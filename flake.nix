@@ -18,14 +18,6 @@
       url = "github:nix-community/colmena/v0.5.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # Optional external secrets repository. Because `flake = false`, the input
-    # is a directory and can be passed straight to `secretsDir`.
-    #
-    # allenyou-secrets = {
-    #   url = "git+ssh://git@github.com/Allenyou1126/nixos-secret.git?shallow=1";
-    #   flake = false;
-    # };
   };
 
   outputs =
@@ -39,7 +31,6 @@
       nixpkgs.config.allowUnfree = true;
 
       secretsDir = ./secrets;
-      # secretsDir = inputs.allenyou-secrets;
 
       colmena = {
         enable = true;
