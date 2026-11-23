@@ -1,2 +1,0 @@
-{ terminus-hello }:
-terminus-hello
