@@ -6,6 +6,10 @@
     "server"
   ];
 
+  profiles = [
+    "cn"
+  ];
+
   deployment = {
     targetHost = "sha-ali-gaal.server.allenyou.wang";
     targetPort = 2333;

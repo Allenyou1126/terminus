@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ lib, terminus, ... }:
 {
   options.terminus.nix.substituters.entries = lib.mkOption {
     type = lib.types.listOf (
@@ -23,7 +23,10 @@
         };
       }
     );
-    default = [ ];
+    default = with terminus.exports.substituterPresets; [
+      allenyou-cache
+      official
+    ];
     description = "要启用的 Nix substituters；可引用 terminus.exports.substituterPresets。";
   };
 }

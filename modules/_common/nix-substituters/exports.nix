@@ -1,12 +1,12 @@
 {
   substituterPresets = {
-    ustc = {
+    ustc-mirror = {
       url = "https://mirrors.ustc.edu.cn/nix-channels/store";
       priority = 10;
       trustedPublicKeys = [ ];
     };
 
-    r2 = {
+    allenyou-cache = {
       url = "https://nix-cache.allenyou.wang";
       priority = 20;
       trustedPublicKeys = [
@@ -16,9 +16,15 @@
       ];
     };
 
-    official = {
+    official-cloudflare-mirror = {
       url = "https://nix-cache-official.allenyou.wang";
       priority = 30;
+      trustedPublicKeys = [ ];
+    };
+
+    official = {
+      url = "https://cache.nixos.org";
+      priority = 40;
       trustedPublicKeys = [ ];
     };
   };
