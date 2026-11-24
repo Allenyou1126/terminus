@@ -1,4 +1,15 @@
-{ ... }:
+{
+  lib,
+  terminus,
+  ...
+}:
+let
+  # `homes/<user>/default.nix` is imported on every host; role filtering only
+  # applies to modules. Treat a standalone home (no host) and a host with
+  # roles = null (all roles) as client-capable, matching module selection.
+  isClient =
+    terminus.host == null || terminus.host.roles == null || builtins.elem "client" terminus.host.roles;
+in
 {
   home.stateVersion = "25.11";
 
@@ -6,7 +17,8 @@
     user.name = "Allen You";
     user.email = "i@allenyou.wang";
   };
-
+}
+// lib.optionalAttrs isClient {
   programs.ssh.settings = {
     hkg-dog-darell = {
       hostname = "hkg-dog-darell.server.allenyou.wang";

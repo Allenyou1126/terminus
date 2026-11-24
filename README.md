@@ -67,8 +67,8 @@ keys/deploy/*.pub          远程部署用户公钥
 的 `modules.<name> = true/false` 可以强制或跳过导入，但同样不会设置 option。
 
 当前拆分：`_common` 下有 `locale-timezone`、`nix-experimental`、`nix-trusted-users`、
-`nix-gc`、`agenix-cli`、`basic-packages`、`motd`、`home-packages`、`home-bash`、`home-ssh`、
-`home-git`；`server` 下有 `ssh`、`node-exporter`。
+`nix-gc`、`agenix-cli`、`basic-packages`、`motd`、`home-packages`、`home-bash`、`home-git`；
+`client` 下有 `ssh`；`server` 下有 `ssh`、`node-exporter`。
 
 ## 框架结构
 

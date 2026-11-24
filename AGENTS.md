@@ -38,6 +38,12 @@
 - `_common/*/home.nix` modules are imported into every embedded and standalone
   Home Manager config. Keep user identity, SSH host aliases and
   `home.stateVersion` in `homes/<user>/`.
+- Role-specific home modules live under `modules/<role>/.../home.nix`; e.g.
+  `client/ssh` only applies to client hosts. Home files themselves are not
+  role-filtered, so user-specific role-gated settings in
+  `homes/<user>/default.nix` must use `lib.mkIf`/`lib.optionalAttrs` with
+  `terminus.host.roles` (and handle `terminus.host == null` for standalone
+  homes).
 - `server/node-exporter` is server-only. Its `options.nix` is still loaded
   framework-wide by convention, but the exporter config is only imported for
   the server role. Nix substituter/binary cache migration is still pending.
