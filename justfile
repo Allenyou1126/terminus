@@ -13,11 +13,11 @@ apply host:
 
 # Staged remote deployment: activate but keep the old boot default.
 test host:
-    nix run .#colmena -- apply --goal test --on {{host}}
+    nix run .#colmena -- apply test --on {{host}}
 
 # Make the new generation the boot default without activating it.
 boot host:
-    nix run .#colmena -- apply --goal boot --on {{host}}
+    nix run .#colmena -- apply boot --on {{host}}
 
 apply-tag tag:
     nix run .#colmena -- apply --on @{{tag}}

@@ -74,7 +74,7 @@ in
           };
         in
         pkgs.runCommand "terminus-secret-paths" { } ''
-          test "${unsafeDiscardStringContext sample.file}" = "${unsafeDiscardStringContext secrets.root}/terminus-self-test.age"
+          test "${unsafeDiscardStringContext sample.file}" = "${unsafeDiscardStringContext secrets.storeRoot}/terminus-self-test.age"
           test "${sample.owner}" = "root"
           test "${sample.mode}" = "0400"
           touch $out

@@ -11,6 +11,11 @@ in
     let
       root = toString secretsDir;
 
+      # Store directory used by the default `file` values. Interpolating the
+      # path keeps the store context so `nix copy` sends secrets/*.age to the
+      # target; `root` stays the human-facing source path.
+      storeRoot = "${secretsDir}";
+
       checkDir =
         if !(isPath secretsDir || isString secretsDir) then
           errors.badSecretsDir secretsDir
@@ -23,7 +28,10 @@ in
         args:
         let
           name = args.name or (throw "terminus.secrets.secret: missing name");
-          file = args.file or "${root}/${name}.age";
+          # Interpolate the path itself so Nix keeps the store context. Using
+          # the `toString`-derived `root` here drops context and Colmena would
+          # not copy secrets/*.age to the target.
+          file = args.file or "${secretsDir}/${name}.age";
           options = removeAttrs args [
             "name"
             "file"
@@ -37,6 +45,6 @@ in
         };
     in
     {
-      inherit root secret;
+      inherit root storeRoot secret;
     };
 }

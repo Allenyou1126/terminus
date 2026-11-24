@@ -29,7 +29,7 @@ sudo nixos-rebuild switch --flake .#sha-ali-gaal
 远程 Colmena 部署：
 
 ```bash
-nix run .#colmena -- apply --goal test --on sha-ali-gaal   # 先测试激活
+nix run .#colmena -- apply test --on sha-ali-gaal          # 先测试激活
 nix run .#colmena -- apply --on sha-ali-gaal              # 确认后正式切换
 ```
 
@@ -67,7 +67,7 @@ keys/deploy/*.pub          远程部署用户公钥
 的 `modules.<name> = true/false` 可以强制或跳过导入，但同样不会设置 option。
 
 当前拆分：`_common` 下有 `locale-timezone`、`nix-experimental`、`nix-trusted-users`、
-`nix-gc`、`agenix`、`basic-packages`、`motd`、`home-packages`、`home-bash`、`home-ssh`、
+`nix-gc`、`agenix-cli`、`basic-packages`、`motd`、`home-packages`、`home-bash`、`home-ssh`、
 `home-git`；`server` 下有 `ssh`、`node-exporter`。
 
 ## 框架结构
@@ -126,6 +126,10 @@ age.secrets.oss-nix-cache-config =
 `users/<name>/meta.nix` 的密码配置二选一：`hashedPasswordSecret = "example-password"`
 对应 `secrets/example-password.age`；或直接写 `hashedPassword = "$6$..."`。两者不能同时设置。
 
+`terminus.secrets.secret` 默认用 `"${secretsDir}/<name>.age"` 保留 Nix store
+context；不要先用 `toString` 把 `secretsDir` 变成普通字符串，否则 Colmena 不会把
+`.age` 文件复制到目标机。
+
 编辑/检查/rekey 在 `secrets/` 下：
 
 ```bash
@@ -167,6 +171,11 @@ sudo nixos-rebuild switch --flake .#<host>
 远程只使用 Colmena，目标机上的专用 `deploy` 用户使用密钥登录和
 `NOPASSWD: ALL` sudo。把公钥放到 `keys/deploy/*.pub`；私钥只留在部署机上。
 
+`deploy` 用户同时加入 `nix.settings.trusted-users`，否则 Colmena 通过 ssh-ng
+推送未签名 store path 时会被目标机拒绝。非默认私钥路径在
+`hosts/<name>/meta.nix` 的 `deployment.sshOptions` 中指定，例如
+`-i /home/allenyou/.ssh/terminus_deploy`。
+
 为了阻止受限 sudo 用户通过 `sudo -u deploy bash` 绕过自己的限制，框架在
 `security.sudo.extraRules` 的**最后**追加：
 
@@ -178,13 +187,13 @@ ALL ALL=(deploy,#1001) !ALL
 deploy key 本身等价 root，仍应按 root 凭据管理。
 
 ```bash
-nix run .#colmena -- apply --goal test --on <host>
+nix run .#colmena -- apply test --on <host>
 nix run .#colmena -- apply --on <host>
 nix run .#colmena -- apply --on @<tag>
 ```
 
 Colmena 没有自动回滚。涉及 SSH、防火墙、bootloader 的变更新先用
-`--goal test`，必要时用 `--goal boot`，并准备控制台。手工回滚：
+`apply test`，必要时用 `apply boot`，并准备控制台。手工回滚：
 
 ```bash
 ssh <host>

@@ -12,11 +12,17 @@
 - Secrets are one directory (`secretsDir`) and uniform `<name>.age` files; no
   common/host naming convention. `terminus.secrets.secret` returns the full
   `age.secrets.<name>` value, so do not use `//` to append owner/mode.
+- Secret file paths must keep Nix store context
+  (`"${secretsDir}/<name>.age"`); do not derive them with `toString`, or
+  Colmena will omit `secrets/*.age` when copying the system closure.
 - Secrets editing is in `secrets/justfile`; the editor runs as the invoking
   user. The recipe ports agenix's `mktemp -d` + `cleanup` + `trap` pattern and
   passes editor output to `agenix -e` via stdin. Do not add `edit-raw`.
 - Remote deployment is Colmena only. The `deploy` user has `NOPASSWD: ALL`;
-  deploy public keys live in `keys/deploy/*.pub`.
+  deploy public keys live in `keys/deploy/*.pub`. The deploy user is also in
+  `nix.settings.trusted-users`; Colmena needs this to push unsigned closures
+  over ssh-ng. `deployment.sshOptions` points at the private key when it is not
+  the default identity.
 - `lib/deploy.nix` appends a last sudoers rule denying all users
   `runAs = "deploy,#1001"` (`!ALL`). Do not add a later rule allowing
   `runAs = "deploy"`; that would re-enable `sudo -u deploy bash` and let

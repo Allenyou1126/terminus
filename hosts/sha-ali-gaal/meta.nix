@@ -11,6 +11,12 @@
     targetPort = 2333;
     sshUser = "deploy";
     buildOnRemote = false;
+    sshOptions = [
+      "-i"
+      "/home/allenyou/.ssh/terminus_deploy"
+      "-o"
+      "IdentitiesOnly=yes"
+    ];
     tags = [
       "server"
       "sha"
