@@ -99,7 +99,10 @@ let
   homeFiles = concatMap (
     userDir:
     let
-      files = filter (e: e.name != "meta.nix") (fs.nixFiles userDir.path);
+      # `_*.nix` are fragments imported by default.nix / <host>.nix, not
+      # host-specific home entries. `default.nix` and `<host>.nix` remain the
+      # discovered entry points.
+      files = filter (e: e.name != "meta.nix" && !(lib.hasPrefix "_" e.name)) (fs.nixFiles userDir.path);
     in
     map (
       file:

@@ -44,6 +44,8 @@
   `homes/<user>/default.nix` must use `lib.mkIf`/`lib.optionalAttrs` with
   `terminus.host.roles` (and handle `terminus.host == null` for standalone
   homes).
+- `homes/<user>/_*.nix` are fragments ignored by discovery; import them from
+  `default.nix` or `<host>.nix`. Do not name fragments after hosts.
 - `server/node-exporter` is server-only. Its `options.nix` is still loaded
   framework-wide by convention, but the exporter config is only imported for
   the server role. Nix substituter/binary cache migration is still pending.

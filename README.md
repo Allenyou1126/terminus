@@ -45,6 +45,7 @@ hosts/<name>/              nixosConfigurations.<name> + colmenaHive 节点
 users/<name>/              users.users/groups + Agenix 密码
 homes/<user>/default.nix   homeConfigurations.<user>
 homes/<user>/<host>.nix    homeConfigurations."<user>@<host>"
+homes/<user>/_*.nix        被 discovery 忽略；由 default/host 文件 imports
 modules/<path>/{options,default,nixos,home}.nix
 profiles/<name>.nix
 packages/<name>/           或 packages/<system>/<name>/
@@ -69,6 +70,9 @@ keys/deploy/*.pub          远程部署用户公钥
 当前拆分：`_common` 下有 `locale-timezone`、`nix-experimental`、`nix-trusted-users`、
 `nix-gc`、`agenix-cli`、`basic-packages`、`motd`、`home-packages`、`home-bash`、`home-git`；
 `client` 下有 `ssh`；`server` 下有 `ssh`、`node-exporter`。
+
+`homes/<user>/default.nix` 可以用 `imports = [ ./_git.nix ./_ssh.nix ];` 拆分；
+`_*.nix` 不会被 discovery 当作 host 专用 home，`<host>.nix` 仍保留给 host 专用文件。
 
 ## 框架结构
 
