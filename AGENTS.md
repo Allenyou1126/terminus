@@ -21,8 +21,9 @@
 - Remote deployment is Colmena only. The `deploy` user has `NOPASSWD: ALL`;
   deploy public keys live in `keys/deploy/*.pub`. The deploy user is also in
   `nix.settings.trusted-users`; Colmena needs this to push unsigned closures
-  over ssh-ng. `deployment.sshOptions` points at the private key when it is not
-  the default identity.
+  over ssh-ng. Keep private-key paths in the deployment machine's
+  `~/.ssh/config` (`IdentityFile`/`IdentitiesOnly`); do not commit
+  machine-specific `deployment.sshOptions` such as `-i /home/...`.
 - `lib/deploy.nix` appends a last sudoers rule denying all users
   `runAs = "deploy,#1001"` (`!ALL`). Do not add a later rule allowing
   `runAs = "deploy"`; that would re-enable `sudo -u deploy bash` and let
