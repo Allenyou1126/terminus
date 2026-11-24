@@ -15,6 +15,7 @@ let
     ;
 
   users = import ./users.nix { inherit lib; };
+  exportsTools = import ./internal/exports.nix { inherit lib; };
 
   frameworkOptions =
     { lib, ... }:
@@ -89,6 +90,10 @@ in
       extraHomeModules ? [ ],
     }:
     let
+      moduleExports = exportsTools.collect {
+        inherit discovery inputs self;
+      };
+
       contexts = lib.mapAttrs (
         name: host:
         let
@@ -131,6 +136,7 @@ in
               host = host.meta;
               secrets = secrets;
               deployKeys = discovery.deployKeys;
+              exports = moduleExports;
             };
           }
           // nixosSpecialArgs;
@@ -235,6 +241,7 @@ in
           host = null;
           secrets = secrets;
           deployKeys = discovery.deployKeys;
+          exports = moduleExports;
         };
       }
       // homeSpecialArgs;

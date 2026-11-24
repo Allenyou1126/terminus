@@ -32,6 +32,13 @@
   options. Modules with unconditional config apply on import; modules gated by
   `mkIf config.terminus.*.enable` need the option set. `hosts/<name>/meta.nix`
   `modules.<name> = true/false` is only an import override, not an option.
+- Modules may add `exports.nix` (plain attrset or `{ lib, inputs, self, ... }:`
+  function). The framework merges exports into `terminus.exports`; exports are
+  host-independent and duplicate keys are rejected. Do not require hosts to
+  import shared value files.
+- `nix-substituters` exports `substituterPresets`; hosts select them via
+  `terminus.exports.substituterPresets` and `entries`. Only public
+  `trustedPublicKeys` belong in the repo.
 - `lib/users.nix` sets `users.mutableUsers = false` for every host.
   `users/<name>/meta.nix` supports `hashedPassword` or
   `hashedPasswordSecret` (mutually exclusive); do not set both.
@@ -48,7 +55,7 @@
   `default.nix` or `<host>.nix`. Do not name fragments after hosts.
 - `server/node-exporter` is server-only. Its `options.nix` is still loaded
   framework-wide by convention, but the exporter config is only imported for
-  the server role. Nix substituter/binary cache migration is still pending.
+  the server role.
 - Verification:
   - `nix flake check path:. --no-build`
   - `nix build .#checks.x86_64-linux.terminus-colmena-consistency`

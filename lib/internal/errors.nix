@@ -31,6 +31,21 @@
 
   duplicate = kind: name: throw "terminus: duplicate ${kind} '${name}'";
 
+  invalidModuleExport =
+    module: got:
+    throw ''
+      terminus: module '${module}' exports.nix must return an attribute set
+        got: ${got}
+    '';
+
+  duplicateExport =
+    key: first: second:
+    throw ''
+      terminus: duplicate module export '${key}'
+        defined by: ${first}
+        also by:    ${second}
+    '';
+
   unknownModule = kind: name: throw "terminus: unknown ${kind} '${name}'";
 
   unknownProfile = profile: throw "terminus: unknown profile '${profile}'";

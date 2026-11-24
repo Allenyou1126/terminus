@@ -4,7 +4,6 @@ Terminus 是一套自包含的、参考 SnowveilOrg/Snowveil 目录约定的 Nix
 目录结构直接映射为 flake outputs，显式区分“发现/元数据”和“NixOS/Home Manager 模块求值”。
 
 当前版本：`0.1.0`，范围是框架 + 首个真实主机 `sha-ali-gaal`；demo 已移除，其余主机尚未迁移。
-Nix substituter / binary cache 配置尚未迁移，主机当前使用默认 `cache.nixos.org`。
 
 ## 快速开始
 
@@ -46,7 +45,7 @@ users/<name>/              users.users/groups + Agenix 密码
 homes/<user>/default.nix   homeConfigurations.<user>
 homes/<user>/<host>.nix    homeConfigurations."<user>@<host>"
 homes/<user>/_*.nix        被 discovery 忽略；由 default/host 文件 imports
-modules/<path>/{options,default,nixos,home}.nix
+modules/<path>/{options,default,nixos,home,exports}.nix
 profiles/<name>.nix
 packages/<name>/           或 packages/<system>/<name>/
 overlays/<name>/           overlays.<name>
@@ -68,8 +67,41 @@ keys/deploy/*.pub          远程部署用户公钥
 的 `modules.<name> = true/false` 可以强制或跳过导入，但同样不会设置 option。
 
 当前拆分：`_common` 下有 `locale-timezone`、`nix-experimental`、`nix-trusted-users`、
-`nix-gc`、`agenix-cli`、`basic-packages`、`motd`、`home-packages`、`home-bash`、`home-git`；
-`client` 下有 `ssh`；`server` 下有 `ssh`、`node-exporter`。
+`nix-gc`、`nix-substituters`、`agenix-cli`、`basic-packages`、`motd`、`home-packages`、
+`home-bash`、`home-git`；`client` 下有 `ssh`；`server` 下有 `ssh`、`node-exporter`。
+
+### Module exports
+
+模块目录可以放 `exports.nix`，它不会被当作 NixOS/Home Manager 模块导入，而是由框架收集并
+合并到所有模块都能访问的 `terminus.exports`：
+
+```nix
+# modules/_common/example/exports.nix
+{
+  examplePresets = {
+    foo = { ... };
+  };
+}
+```
+
+`exports.nix` 也可以写成 `{ lib, inputs, self, ... }:` 形式。导出必须是 attrset，且各模块
+导出的 key 必须全局唯一；重复 key 会报错。导出是 host-independent 的，不能依赖 host/config。
+
+### Nix substituters
+
+`modules/_common/nix-substituters` 通过 `exports.nix` 导出 `substituterPresets`，主机直接选用：
+
+```nix
+terminus.nix.substituters.entries = [
+  terminus.exports.substituterPresets.ustc
+  terminus.exports.substituterPresets.r2
+  terminus.exports.substituterPresets.official
+];
+```
+
+`entries` 是 list of attrset：`url`、`priority`、`trustedPublicKeys`。默认 `priority = 40`，
+`priority = null` 表示原样使用 URL；默认 `cache.nixos.org` 和它的 key 仍由 NixOS 保留。
+私有签名 key 只留在主机，不进入仓库。
 
 `homes/<user>/default.nix` 可以用 `imports = [ ./_git.nix ./_ssh.nix ];` 拆分；
 `_*.nix` 不会被 discovery 当作 host 专用 home，`<host>.nix` 仍保留给 host 专用文件。
@@ -82,6 +114,7 @@ keys/deploy/*.pub          远程部署用户公钥
 - `lib/users.nix`：`users/<name>/meta.nix` → `users.users/groups`；框架统一设置
   `users.mutableUsers = false`，支持 `hashedPassword` / `hashedPasswordSecret`（互斥）。
 - `lib/secret.nix`：`secretsDir` 路径 helper；统一 `<name>.age`。
+- `lib/internal/exports.nix`：收集模块 `exports.nix`，合并注入 `terminus.exports`。
 - `lib/hosts.nix`：共享 host modules；标准 `nixosConfigurations` 与 Colmena 共用。
 - `lib/hive.nix`：`colmenaHive` + toplevel 一致性 shim。
 - `lib/deploy.nix`：`deploy` 用户、Colmena deployment 元数据。

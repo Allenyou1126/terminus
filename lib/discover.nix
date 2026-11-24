@@ -217,6 +217,7 @@ let
     "default.nix"
     "nixos.nix"
     "home.nix"
+    "exports.nix"
   ];
 
   walkModules =
