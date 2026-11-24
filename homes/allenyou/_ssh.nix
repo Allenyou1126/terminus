@@ -36,5 +36,11 @@ lib.optionalAttrs isClient {
       user = "allenyou";
       identityFile = "~/.ssh/id_ed25519";
     };
+    home-ebeling = {
+      hostname = "192.168.100.60";
+      port = 2333;
+      user = "allenyou";
+      identityFile = "~/.ssh/id_ed25519";
+    };
   };
 }

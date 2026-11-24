@@ -1,5 +1,8 @@
 {
-  hosts = [ "sha-ali-gaal" ];
+  hosts = [
+    "sha-ali-gaal"
+    "home-ebeling"
+  ];
   uid = 1000;
   group = "users";
   extraGroups = [ "wheel" ];

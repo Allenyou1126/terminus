@@ -3,7 +3,7 @@
 Terminus 是一套自包含的、参考 SnowveilOrg/Snowveil 目录约定的 NixOS 配置框架。
 目录结构直接映射为 flake outputs，显式区分“发现/元数据”和“NixOS/Home Manager 模块求值”。
 
-当前版本：`0.1.0`，范围是框架 + 首个真实主机 `sha-ali-gaal`；demo 已移除，其余主机尚未迁移。
+当前版本：`0.1.0`，已迁移 `sha-ali-gaal` 与 `home-ebeling`；demo 已移除，其余主机尚未迁移。
 
 ## 快速开始
 
@@ -68,7 +68,8 @@ keys/deploy/*.pub          远程部署用户公钥
 
 当前拆分：`_common` 下有 `locale-timezone`、`nix-experimental`、`nix-trusted-users`、
 `nix-gc`、`nix-substituters`、`agenix-cli`、`basic-packages`、`motd`、`home-packages`、
-`home-bash`、`home-git`；`client` 下有 `ssh`；`server` 下有 `ssh`、`node-exporter`。
+`home-bash`、`home-git`；`client` 下有 `ssh`、`deepseek-harness`；`server` 下有 `ssh`、
+`node-exporter`、`deepseek-harness`。
 
 ### Module exports
 
@@ -93,15 +94,19 @@ keys/deploy/*.pub          远程部署用户公钥
 
 ```nix
 terminus.nix.substituters.entries = [
-  terminus.exports.substituterPresets.ustc
-  terminus.exports.substituterPresets.r2
-  terminus.exports.substituterPresets.official
+  terminus.exports.substituterPresets.ustc-mirror
+  terminus.exports.substituterPresets.allenyou-cache
+  terminus.exports.substituterPresets.official-cloudflare-mirror
 ];
 ```
 
 `entries` 是 list of attrset：`url`、`priority`、`trustedPublicKeys`。默认 `priority = 40`，
 `priority = null` 表示原样使用 URL；默认 `cache.nixos.org` 和它的 key 仍由 NixOS 保留。
 私有签名 key 只留在主机，不进入仓库。
+
+`profiles = [ "cn" ]` / `[ "global" ]` 只决定导入哪些模块文件，不会打开
+`terminus.nix.substituters.presets.*`；主机仍需显式设置 `presets.cn = true`
+（`home-ebeling`、`sha-ali-gaal` 都这样做）。
 
 `homes/<user>/default.nix` 可以用 `imports = [ ./_git.nix ./_ssh.nix ];` 拆分；
 `_*.nix` 不会被 discovery 当作 host 专用 home，`<host>.nix` 仍保留给 host 专用文件。
@@ -217,6 +222,18 @@ Host sha-ali-gaal.server.allenyou.wang
     IdentityFile ~/.ssh/terminus_deploy
     IdentitiesOnly yes
 ```
+
+`home-ebeling` 只有内网地址（`192.168.100.60:2333`），部署机需要能路由到
+`192.168.100.0/24`（例如通过 WireGuard），并为这个地址配置同一把 deploy 私钥：
+
+```sshconfig
+Host 192.168.100.60
+    IdentityFile ~/.ssh/terminus_deploy
+    IdentitiesOnly yes
+```
+
+首次迁移时目标机上还没有 `deploy` 用户，需要先在目标机本地运行
+`sudo nixos-rebuild switch --flake .#home-ebeling`，之后才能用 Colmena。
 
 Colmena 会把 `targetHost`/`User`/`Port` 传给 `ssh`，SSH 配置负责选择私钥。
 `deployment.sshOptions` 仍可用于非机器相关的 ssh 参数，但不要把本机私钥路径提交进仓库。
