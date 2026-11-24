@@ -1,8 +1,4 @@
-{
-  config,
-  terminus,
-  ...
-}:
+{ ... }:
 {
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -17,16 +13,11 @@
     ];
   };
 
-  age.secrets.deepseek-harness-secret = terminus.secrets.secret {
-    name = "deepseek-harness-secret";
-  };
-
   terminus.deepseekHarness.server = {
     enable = true;
     host = "192.168.100.60";
     publicUrl = "https://dsh.allenyou.top/";
     trustedHosts = [ "dsh.allenyou.top" ];
     openFirewall = true;
-    environmentFile = config.age.secrets.deepseek-harness-secret.path;
   };
 }
