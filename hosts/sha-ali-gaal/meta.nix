@@ -11,7 +11,7 @@
   ];
 
   deployment = {
-    targetHost = "sha-ali-gaal.server.allenyou.wang";
+    targetHost = "sha-ali-gaal";
     targetPort = 2333;
     sshUser = "deploy";
     buildOnRemote = false;
