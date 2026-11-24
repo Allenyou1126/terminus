@@ -144,6 +144,15 @@ let
 
       profiles = if meta ? profiles then stringList file "profiles" meta.profiles else [ ];
 
+      description =
+        if meta ? description then
+          if meta.description == null || isString meta.description then
+            meta.description
+          else
+            errors.invalidMeta file "description must be a string or null" (typeOf meta.description)
+        else
+          null;
+
       home =
         let
           value = meta.home or { };
@@ -222,6 +231,7 @@ let
         system
         roles
         profiles
+        description
         home
         secrets
         deployment
@@ -234,52 +244,16 @@ let
     file: meta:
     let
       hosts = if meta ? hosts then stringList file "hosts" meta.hosts else [ ];
-    in
-    {
-      inherit hosts;
-      uid =
-        if meta ? uid then
-          if meta.uid == null || isInt meta.uid then
-            meta.uid
+
+      hashedPassword =
+        if meta ? hashedPassword then
+          if meta.hashedPassword == null || isString meta.hashedPassword then
+            meta.hashedPassword
           else
-            errors.invalidMeta file "uid must be an integer or null" (typeOf meta.uid)
+            errors.invalidMeta file "hashedPassword must be a string or null" (typeOf meta.hashedPassword)
         else
           null;
-      gid =
-        if meta ? gid then
-          if meta.gid == null || isInt meta.gid then
-            meta.gid
-          else
-            errors.invalidMeta file "gid must be an integer or null" (typeOf meta.gid)
-        else
-          null;
-      group =
-        if meta ? group then
-          if meta.group == null || isString meta.group then
-            meta.group
-          else
-            errors.invalidMeta file "group must be a string or null" (typeOf meta.group)
-        else
-          null;
-      extraGroups = if meta ? extraGroups then stringList file "extraGroups" meta.extraGroups else [ ];
-      description =
-        if meta ? description then
-          if meta.description == null || isString meta.description then
-            meta.description
-          else
-            errors.invalidMeta file "description must be a string or null" (typeOf meta.description)
-        else
-          null;
-      home =
-        if meta ? home then
-          if meta.home == null || isString meta.home then
-            meta.home
-          else
-            errors.invalidMeta file "home must be a string or null" (typeOf meta.home)
-        else
-          null;
-      createHome = boolOr file "createHome" true (meta.createHome or null);
-      isNormalUser = boolOr file "isNormalUser" true (meta.isNormalUser or null);
+
       hashedPasswordSecret =
         if meta ? hashedPasswordSecret then
           if meta.hashedPasswordSecret == null || isString meta.hashedPasswordSecret then
@@ -290,8 +264,57 @@ let
             )
         else
           null;
-      raw = meta;
-    };
+    in
+    if hashedPassword != null && hashedPasswordSecret != null then
+      errors.invalidMeta file "only one of hashedPassword and hashedPasswordSecret may be set" "both set"
+    else
+      {
+        inherit hosts hashedPassword hashedPasswordSecret;
+        uid =
+          if meta ? uid then
+            if meta.uid == null || isInt meta.uid then
+              meta.uid
+            else
+              errors.invalidMeta file "uid must be an integer or null" (typeOf meta.uid)
+          else
+            null;
+        gid =
+          if meta ? gid then
+            if meta.gid == null || isInt meta.gid then
+              meta.gid
+            else
+              errors.invalidMeta file "gid must be an integer or null" (typeOf meta.gid)
+          else
+            null;
+        group =
+          if meta ? group then
+            if meta.group == null || isString meta.group then
+              meta.group
+            else
+              errors.invalidMeta file "group must be a string or null" (typeOf meta.group)
+          else
+            null;
+        extraGroups = if meta ? extraGroups then stringList file "extraGroups" meta.extraGroups else [ ];
+        description =
+          if meta ? description then
+            if meta.description == null || isString meta.description then
+              meta.description
+            else
+              errors.invalidMeta file "description must be a string or null" (typeOf meta.description)
+          else
+            null;
+        home =
+          if meta ? home then
+            if meta.home == null || isString meta.home then
+              meta.home
+            else
+              errors.invalidMeta file "home must be a string or null" (typeOf meta.home)
+          else
+            null;
+        createHome = boolOr file "createHome" true (meta.createHome or null);
+        isNormalUser = boolOr file "isNormalUser" true (meta.isNormalUser or null);
+        raw = meta;
+      };
 
   normalizeOutputMeta = file: meta: {
     enable =

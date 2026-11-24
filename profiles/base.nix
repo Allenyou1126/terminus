@@ -1,3 +1,0 @@
-{
-  nixos = [ "server.base" ];
-}

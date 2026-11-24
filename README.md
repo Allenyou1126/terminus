@@ -3,7 +3,8 @@
 Terminus 是一套自包含的、参考 SnowveilOrg/Snowveil 目录约定的 NixOS 配置框架。
 目录结构直接映射为 flake outputs，显式区分“发现/元数据”和“NixOS/Home Manager 模块求值”。
 
-当前版本：`0.1.0`，范围是框架 + 一个 demo 主机，不是现有主机的完整迁移。
+当前版本：`0.1.0`，范围是框架 + 首个真实主机 `sha-ali-gaal`；demo 已移除，其余主机尚未迁移。
+Nix substituter / binary cache 配置尚未迁移，主机当前使用默认 `cache.nixos.org`。
 
 ## 快速开始
 
@@ -22,21 +23,21 @@ nix fmt
 本机部署（在目标机执行）：
 
 ```bash
-sudo nixos-rebuild switch --flake .#demo
+sudo nixos-rebuild switch --flake .#sha-ali-gaal
 ```
 
 远程 Colmena 部署：
 
 ```bash
-nix run .#colmena -- apply --goal test --on demo   # 先测试激活
-nix run .#colmena -- apply --on demo              # 确认后正式切换
+nix run .#colmena -- apply --goal test --on sha-ali-gaal   # 先测试激活
+nix run .#colmena -- apply --on sha-ali-gaal              # 确认后正式切换
 ```
 
 ## 目录约定
 
 ```text
 hosts/<name>/              nixosConfigurations.<name> + colmenaHive 节点
-  meta.nix                 system / roles / profiles / home / deployment
+  meta.nix                 system / description / roles / profiles / home / deployment
   default.nix              必需；主机模块
   hardware.nix             可选；自动导入
   disk.nix                 可选；自动导入
@@ -61,12 +62,21 @@ keys/deploy/*.pub          远程部署用户公钥
 `options.nix` / `default.nix` 始终加载。模块目录的 `meta.nix` 支持 `requires` / `after` /
 `before` / `wants` / `conflicts`，组合时做稳定拓扑排序。
 
+角色只决定哪些 side 文件被导入，**不会设置模块 option**：无 option 门控、config 无条件的
+模块导入即生效；带 `mkIf config.xxx.enable` 的模块仍需显式开启。`hosts/<name>/meta.nix`
+的 `modules.<name> = true/false` 可以强制或跳过导入，但同样不会设置 option。
+
+当前拆分：`_common` 下有 `locale-timezone`、`nix-experimental`、`nix-trusted-users`、
+`nix-gc`、`agenix`、`basic-packages`、`motd`、`home-packages`、`home-bash`、`home-ssh`、
+`home-git`；`server` 下有 `ssh`、`node-exporter`。
+
 ## 框架结构
 
 - `lib/discover.nix`：纯文件系统扫描；不求值任何 NixOS 配置。
 - `lib/metadata.nix`：`meta.nix` 校验与归一化。
 - `lib/modules.nix` / `lib/profiles.nix` / `lib/depgraph.nix`：角色、profile、依赖排序。
-- `lib/users.nix`：`users/<name>/meta.nix` → `users.users/groups`。
+- `lib/users.nix`：`users/<name>/meta.nix` → `users.users/groups`；框架统一设置
+  `users.mutableUsers = false`，支持 `hashedPassword` / `hashedPasswordSecret`（互斥）。
 - `lib/secret.nix`：`secretsDir` 路径 helper；统一 `<name>.age`。
 - `lib/hosts.nix`：共享 host modules；标准 `nixosConfigurations` 与 Colmena 共用。
 - `lib/hive.nix`：`colmenaHive` + toplevel 一致性 shim。
@@ -105,22 +115,22 @@ mkFlake {
 的 `publicKeys` 决定。Helper 直接返回完整的 `age.secrets.<name>` 值：
 
 ```nix
-age.secrets.demo-token =
+age.secrets.oss-nix-cache-config =
   terminus.secrets.secret {
-    name = "demo-token";
-    owner = "demo";
+    name = "oss-nix-cache-config";
+    owner = "allenyou";
     mode = "0400";
   };
 ```
 
-`users/<name>/meta.nix` 的 `hashedPasswordSecret = "demo-password"` 对应
-`secrets/demo-password.age`。
+`users/<name>/meta.nix` 的密码配置二选一：`hashedPasswordSecret = "example-password"`
+对应 `secrets/example-password.age`；或直接写 `hashedPassword = "$6$..."`。两者不能同时设置。
 
 编辑/检查/rekey 在 `secrets/` 下：
 
 ```bash
 cd secrets
-just edit demo-token
+just edit example-token
 just check
 just rekey
 ```

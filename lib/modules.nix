@@ -17,6 +17,10 @@ let
 
   fileKind = path: lib.removeSuffix ".nix" (baseNameOf path);
 
+  # Roles only decide which side files are imported. They never set options:
+  # a role-selected module with `mkIf option` stays disabled until the option
+  # is set. Module-level meta.*.enable and host meta.modules are separate
+  # import-selection mechanisms.
   roleAllowed =
     host: module:
     let

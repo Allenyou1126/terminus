@@ -53,7 +53,7 @@ just rekey
 
 ```bash
 cd secrets
-just edit demo-token
+just edit example-token
 ```
 
 The editor runs as the current user. `sudo` is only used for `agenix -d` and

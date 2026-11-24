@@ -21,12 +21,27 @@
   `runAs = "deploy,#1001"` (`!ALL`). Do not add a later rule allowing
   `runAs = "deploy"`; that would re-enable `sudo -u deploy bash` and let
   restricted sudo users inherit deploy's NOPASSWD rule.
+- Roles only decide which module side files are imported; they never set
+  options. Modules with unconditional config apply on import; modules gated by
+  `mkIf config.terminus.*.enable` need the option set. `hosts/<name>/meta.nix`
+  `modules.<name> = true/false` is only an import override, not an option.
+- `lib/users.nix` sets `users.mutableUsers = false` for every host.
+  `users/<name>/meta.nix` supports `hashedPassword` or
+  `hashedPasswordSecret` (mutually exclusive); do not set both.
+- `_common/*/home.nix` modules are imported into every embedded and standalone
+  Home Manager config. Keep user identity, SSH host aliases and
+  `home.stateVersion` in `homes/<user>/`.
+- `server/node-exporter` is server-only. Its `options.nix` is still loaded
+  framework-wide by convention, but the exporter config is only imported for
+  the server role. Nix substituter/binary cache migration is still pending.
 - Verification:
   - `nix flake check path:. --no-build`
   - `nix build .#checks.x86_64-linux.terminus-colmena-consistency`
   - `nix build .#checks.x86_64-linux.terminus-deploy-sudo-deny`
-  - compare `nixosConfigurations.demo...toplevel.outPath` with
-    `colmenaHive.nodes.demo...toplevel.outPath`
-  - `nix run .#colmena -- eval -E '{ nodes, ... }: nodes.demo.config.networking.hostName'`
+  - `nix build .#nixosConfigurations.sha-ali-gaal.config.system.build.toplevel`
+  - `nix build .#homeConfigurations.allenyou.activationPackage`
+  - compare `nixosConfigurations.sha-ali-gaal...toplevel.outPath` with
+    `colmenaHive.nodes.sha-ali-gaal...toplevel.outPath`
+  - `nix run .#colmena -- eval -E '{ nodes, ... }: nodes.sha-ali-gaal.config.networking.hostName'`
   - `nix fmt`
 - Do not commit plaintext secrets or private keys.

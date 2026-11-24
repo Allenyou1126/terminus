@@ -48,6 +48,10 @@ in
         { config, ... }:
         {
           config = {
+            # Framework-wide: users are fully declarative; hosts must not be
+            # mutated with useradd/passwd. Do not override this per host.
+            users.mutableUsers = false;
+
             terminus.users = userNames;
 
             users = {
@@ -69,6 +73,9 @@ in
                       group = group;
                       extraGroups = lib.mkDefault meta.extraGroups;
                       uid = lib.mkDefault meta.uid;
+                    }
+                    // lib.optionalAttrs (meta.hashedPassword != null) {
+                      hashedPassword = lib.mkDefault meta.hashedPassword;
                     }
                     // lib.optionalAttrs (meta.home != null) {
                       home = lib.mkDefault meta.home;
