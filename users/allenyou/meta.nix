@@ -1,6 +1,7 @@
 {
   hosts = [
     "sha-ali-gaal"
+    "sha-ali-seldon"
     "home-ebeling"
     "lax-rn-riose"
     "lap-fallom"

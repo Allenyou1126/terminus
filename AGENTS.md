@@ -55,10 +55,10 @@
   homes).
 - `homes/<user>/_*.nix` are fragments ignored by discovery; import them from
   `default.nix` or `<host>.nix`. Do not name fragments after hosts.
-- `server/node-exporter`, `server/bird-exporter`, and
-  `server/wireguard-exporter` are server-only. Their `options.nix` files are
-  still loaded framework-wide by convention, but the exporter config is only
-  imported for the server role.
+- `server/node-exporter`, `server/bird-exporter`, `server/wireguard-exporter`,
+  `server/blackbox-exporter`, and `server/nginx-exporter` are server-only.
+  Their `options.nix` files are still loaded framework-wide by convention, but
+  the exporter config is only imported for the server role.
 - Verification:
   - `nix flake check path:. --no-build`
   - `nix build .#checks.x86_64-linux.terminus-colmena-consistency`

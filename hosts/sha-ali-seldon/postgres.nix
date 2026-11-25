@@ -1,0 +1,4 @@
+{ ... }:
+{
+  terminus.postgresql.enable = true;
+}

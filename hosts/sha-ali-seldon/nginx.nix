@@ -1,0 +1,65 @@
+{ pkgs, ... }:
+let
+  nginxPackage = pkgs.nginxMainline;
+in
+{
+  services.nginx = {
+    enable = true;
+    package = nginxPackage;
+    recommendedBrotliSettings = true;
+    recommendedGzipSettings = true;
+    statusPage = true;
+
+    virtualHosts = {
+      default = {
+        listen = [
+          {
+            addr = "0.0.0.0";
+            port = 80;
+            extraParameters = [
+              "default_server"
+            ];
+          }
+        ];
+        reuseport = true;
+        root = "/var/www/html";
+        serverName = "homepage-cdn-origin.allenyou.top";
+        locations = {
+          "/" = {
+            tryFiles = "$uri $uri/ =404";
+          };
+        };
+        extraConfig = ''
+          if ($http_aliyun_cdn_source_allenyou != 'true') {
+            return 444;
+          }
+        '';
+        default = true;
+      };
+    };
+  };
+
+  terminus.certimate-ssh = {
+    enable = true;
+    group = "nginx";
+    keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP2HKtf/h6LCGS9s29pzRNP2ov3xpssw2Gh9CT8A4Fa8 certimate@sha-ali-seldon"
+    ];
+    allowedCommands = [ "/run/current-system/sw/bin/systemctl reload nginx" ];
+  };
+
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+  ];
+  networking.firewall.allowedUDPPorts = [
+    80
+    443
+  ];
+
+  terminus.nginxExporter = {
+    enable = true;
+    listenAddress = "127.0.0.1";
+    port = 9090;
+  };
+}

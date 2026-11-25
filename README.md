@@ -3,7 +3,7 @@
 Terminus 是一套自包含的、参考 SnowveilOrg/Snowveil 目录约定的 NixOS 配置框架。
 目录结构直接映射为 flake outputs，显式区分“发现/元数据”和“NixOS/Home Manager 模块求值”。
 
-当前版本：`0.1.0`，已迁移 `sha-ali-gaal`、`home-ebeling`、`lax-rn-riose` 与 `lap-fallom`；demo 已移除，其余主机尚未迁移。
+当前版本：`0.1.0`，已迁移 `sha-ali-gaal`、`sha-ali-seldon`、`home-ebeling`、`lax-rn-riose` 与 `lap-fallom`；demo 已移除，其余主机尚未迁移。
 
 ## 快速开始
 
@@ -70,9 +70,10 @@ keys/deploy/*.pub          远程部署用户公钥
 当前拆分：`_common` 下有 `locale-timezone`、`nix-experimental`、`nix-trusted-users`、
 `nix-gc`、`nix-substituters`、`agenix-cli`、`basic-packages`、`motd`、`home-packages`、
 `home-bash`、`home-git`；`client` 下有 `ssh`、`deepseek-harness`；`server` 下有 `ssh`、
-`node-exporter`、`bird-exporter`、`wireguard-exporter`、`deepseek-harness`、`certimate`、`frps`、
-`openviking`；`dn42` 下有 `bird2`、`bird-lg-proxy`、`coredns`、`wireguard`。DN42 主机需要声明
-role `dn42` 才会导入这些模块的 `nixos.nix`，且仍需显式打开各自的 `terminus.dn42.*.enable`。
+`node-exporter`、`bird-exporter`、`wireguard-exporter`、`blackbox-exporter`、`nginx-exporter`、
+`nexusnet`、`postgresql`、`prometheus`、`deepseek-harness`、`certimate`、`frps`、`openviking`；
+`dn42` 下有 `bird2`、`bird-lg-proxy`、`coredns`、`wireguard`。DN42 主机需要声明 role `dn42`
+才会导入这些模块的 `nixos.nix`，且仍需显式打开各自的 `terminus.dn42.*.enable`。
 
 ### Module exports
 
