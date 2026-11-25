@@ -1,0 +1,70 @@
+{ lib, modulesPath, ... }:
+{
+  imports = [
+    (modulesPath + "/profiles/qemu-guest.nix")
+  ];
+
+  boot.initrd.availableKernelModules = [
+    "ata_piix"
+    "uhci_hcd"
+    "virtio_pci"
+    "sr_mod"
+    "virtio_blk"
+  ];
+  boot.initrd.kernelModules = [ ];
+  boot.kernelModules = [ ];
+  boot.extraModulePackages = [ ];
+
+  fileSystems."/" = {
+    device = "/dev/disk/by-uuid/e6ae655d-fd07-4d56-8448-5f51760619ed";
+    fsType = "btrfs";
+    options = [
+      "subvol=root"
+      "compress=zstd"
+    ];
+  };
+
+  fileSystems."/home" = {
+    device = "/dev/disk/by-uuid/e6ae655d-fd07-4d56-8448-5f51760619ed";
+    fsType = "btrfs";
+    options = [
+      "subvol=home"
+      "compress=zstd"
+    ];
+  };
+
+  fileSystems."/var" = {
+    device = "/dev/disk/by-uuid/e6ae655d-fd07-4d56-8448-5f51760619ed";
+    fsType = "btrfs";
+    options = [
+      "subvol=var"
+      "compress=zstd"
+      "noatime"
+    ];
+  };
+
+  fileSystems."/nix" = {
+    device = "/dev/disk/by-uuid/e6ae655d-fd07-4d56-8448-5f51760619ed";
+    fsType = "btrfs";
+    options = [
+      "subvol=nix"
+      "compress=zstd"
+      "noatime"
+    ];
+  };
+
+  fileSystems."/swap" = {
+    device = "/dev/disk/by-uuid/e6ae655d-fd07-4d56-8448-5f51760619ed";
+    fsType = "btrfs";
+    options = [ "subvol=swap" ];
+  };
+
+  swapDevices = [
+    {
+      device = "/swap/swapfile";
+      size = 4 * 1024;
+    }
+  ];
+
+  networking.useDHCP = lib.mkDefault true;
+}

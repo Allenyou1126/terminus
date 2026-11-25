@@ -2,6 +2,7 @@
   hosts = [
     "sha-ali-gaal"
     "home-ebeling"
+    "lax-rn-riose"
   ];
   uid = 1000;
   group = "users";
