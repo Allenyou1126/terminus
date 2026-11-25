@@ -75,10 +75,5 @@
   ];
 
   networking.useDHCP = lib.mkDefault true;
-  networking.defaultGateway = {
-    address = "38.55.97.1";
-    interface = "ens18";
-    source = "38.55.97.96";
-  };
   boot.loader.grub.device = "/dev/sda";
 }
