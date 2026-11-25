@@ -12,8 +12,8 @@ in
       root = toString secretsDir;
 
       # Store directory used by the default `file` values. Interpolating the
-      # path keeps the store context so `nix copy` sends secrets/*.age to the
-      # target; `root` stays the human-facing source path.
+      # path keeps the store context so `nix copy` sends the referenced `.age`
+      # files to the target; `root` stays the human-facing source path.
       storeRoot = "${secretsDir}";
 
       checkDir =
@@ -28,9 +28,11 @@ in
         args:
         let
           name = args.name or (throw "terminus.secrets.secret: missing name");
+          # `name` is relative to secretsDir and may include a category
+          # subdirectory, e.g. "nexusnet/sha-ali-seldon.priv".
           # Interpolate the path itself so Nix keeps the store context. Using
           # the `toString`-derived `root` here drops context and Colmena would
-          # not copy secrets/*.age to the target.
+          # not copy the `.age` file to the target.
           file = args.file or "${secretsDir}/${name}.age";
           options = removeAttrs args [
             "name"

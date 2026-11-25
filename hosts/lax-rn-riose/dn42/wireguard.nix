@@ -5,13 +5,13 @@
 }:
 {
   age.secrets.dn42WireguardPrivateKey = terminus.secrets.secret {
-    name = "wg-private-key.lax-rn-riose";
+    name = "dn42/lax-rn-riose.priv";
     owner = "root";
     mode = "0400";
   };
 
   age.secrets.dn42H503mcPsk = terminus.secrets.secret {
-    name = "wg-psk-dn42-h503mc.lax-rn-riose";
+    name = "dn42/h503mc_lax-rn-riose.psk";
     owner = "root";
     mode = "0400";
   };

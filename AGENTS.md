@@ -4,19 +4,23 @@
 - `nixos-wsl` is pinned to `release-26.05`; WSL hosts import
   `inputs.nixos-wsl.nixosModules.wsl` (see `hosts/lap-fallom`).
 - `lib/` is the framework. `lib/secret.nix` is a secrets helper, **not** the
-  agenix rules file; the rules live in `secrets/secrets.nix`.
+  agenix rules file; the rules live in `secrets/agenix-rules.nix`.
 - `nixosConfigurations` are standard `nixosSystem` values. `colmenaHive` is
   built separately from the same `host.modules` list and adds a shim so both
   toplevels are identical. Never make shared host modules depend on Colmena's
   `name`/`nodes`/`deployment` options.
 - The consistency check is `checks.<system>.terminus-colmena-consistency`.
   If it fails, inspect the shim in `lib/hive.nix` before changing modules.
-- Secrets are one directory (`secretsDir`) and uniform `<name>.age` files; no
-  common/host naming convention. `terminus.secrets.secret` returns the full
-  `age.secrets.<name>` value, so do not use `//` to append owner/mode.
+- Secrets are one directory (`secretsDir`), categorized with subdirectories
+  such as `common/`, `dn42/`, `nexusnet/`, and `services/<service>/`; the file
+  path relative to `secretsDir` must match the rule key in
+  `secrets/agenix-rules.nix`.
+  `terminus.secrets.secret` returns the full `age.secrets.<name>` value, so do
+  not use `//` to append owner/mode.
 - Secret file paths must keep Nix store context
-  (`"${secretsDir}/<name>.age"`); do not derive them with `toString`, or
-  Colmena will omit `secrets/*.age` when copying the system closure.
+  (`"${secretsDir}/<category>/<name>.age"`); do not derive them with
+  `toString`, or Colmena will omit `.age` files when copying the system
+  closure.
 - Secrets editing is in `secrets/justfile`; the editor runs as the invoking
   user. The recipe ports agenix's `mktemp -d` + `cleanup` + `trap` pattern and
   passes editor output to `agenix -e` via stdin. Do not add `edit-raw`.

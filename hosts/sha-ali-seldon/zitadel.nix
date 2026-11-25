@@ -5,13 +5,13 @@
 }:
 {
   age.secrets.zitadel-master-key = terminus.secrets.secret {
-    name = "zitadel-master-key.sha-ali-gaal";
+    name = "services/zitadel/master-key";
     owner = "zitadel";
     mode = "0400";
   };
 
   age.secrets.zitadel-secret-settings = terminus.secrets.secret {
-    name = "zitadel-secret-config.sha-ali-gaal";
+    name = "services/zitadel/secret-config";
     owner = "zitadel";
     mode = "0400";
   };

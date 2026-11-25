@@ -5,19 +5,19 @@
 }:
 {
   age.secrets.wireguardPrivateKeyFile = terminus.secrets.secret {
-    name = "wg-private-key.sha-ali-seldon";
+    name = "nexusnet/sha-ali-seldon.priv";
   };
 
   age.secrets.home-hardin-wireguardPresharedKeyFile = terminus.secrets.secret {
-    name = "wg-psk-home-hardin.sha-ali-seldon";
+    name = "nexusnet/home-hardin_sha-ali-seldon.psk";
   };
 
   age.secrets.lap-fallom-wireguardPresharedKeyFile = terminus.secrets.secret {
-    name = "wg-psk-lap-fallom.sha-ali-seldon";
+    name = "nexusnet/lap-fallom_sha-ali-seldon.psk";
   };
 
   age.secrets.lap-yenner-wireguardPresharedKeyFile = terminus.secrets.secret {
-    name = "wg-psk-lap-yenner.sha-ali-seldon";
+    name = "nexusnet/lap-yenner_sha-ali-seldon.psk";
   };
 
   terminus.nexusnet = {

@@ -6,14 +6,14 @@
   ];
 
   age.secrets.oss-nix-cache-config = terminus.secrets.secret {
-    name = "oss-nix-cache-config";
+    name = "common/oss-nix-cache-config";
     path = "/home/allenyou/.aws/config";
     owner = "allenyou";
     mode = "0400";
   };
 
   age.secrets.aliyun-cli-config = terminus.secrets.secret {
-    name = "aliyun-cli-config";
+    name = "common/aliyun-cli-config";
     path = "/home/allenyou/.aliyun/config.json";
     owner = "allenyou";
     mode = "0400";

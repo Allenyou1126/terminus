@@ -9,7 +9,7 @@ let
 in
 {
   config = lib.mkIf cfg.enable {
-    user.groups.${cfg.group} = lib.mkIf (cfg.group == "certimate") { };
+    users.groups.${cfg.group} = lib.mkIf (cfg.group == "certimate") { };
 
     users.users.${cfg.user} = {
       openssh.authorizedKeys.keys = cfg.keys;

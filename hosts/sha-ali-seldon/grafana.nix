@@ -5,13 +5,13 @@
 }:
 {
   age.secrets.grafana-db-password = terminus.secrets.secret {
-    name = "grafana-db-password.sha-ali-gaal";
+    name = "services/grafana/db-password";
     owner = "grafana";
     group = "grafana";
     mode = "0400";
   };
   age.secrets.grafana-secret-key = terminus.secrets.secret {
-    name = "grafana-secret-key.sha-ali-gaal";
+    name = "services/grafana/secret-key";
     owner = "grafana";
     group = "grafana";
     mode = "0400";

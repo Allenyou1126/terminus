@@ -122,7 +122,7 @@ terminus.nix.substituters.entries = [
 - `lib/modules.nix` / `lib/profiles.nix` / `lib/depgraph.nix`：角色、profile、依赖排序。
 - `lib/users.nix`：`users/<name>/meta.nix` → `users.users/groups`；框架统一设置
   `users.mutableUsers = false`，支持 `hashedPassword` / `hashedPasswordSecret`（互斥）。
-- `lib/secret.nix`：`secretsDir` 路径 helper；统一 `<name>.age`。
+- `lib/secret.nix`：`secretsDir` 路径 helper；支持 `<category>/<name>.age` 相对路径。
 - `lib/internal/exports.nix`：收集模块 `exports.nix`，合并注入 `terminus.exports`。
 - `lib/hosts.nix`：共享 host modules；标准 `nixosConfigurations` 与 Colmena 共用。
 - `lib/hive.nix`：`colmenaHive` + toplevel 一致性 shim。
@@ -157,30 +157,32 @@ mkFlake {
 }
 ```
 
-统一文件名为 `<name>.age`，不区分 common/host。收件人由 `secrets/secrets.nix`
-的 `publicKeys` 决定。Helper 直接返回完整的 `age.secrets.<name>` 值：
+Secret 文件用子目录归类（例如 `common/`、`dn42/`、`nexusnet/`、`services/<service>/`），文件相对路径
+必须与 `secrets/agenix-rules.nix` 的规则 key 一致。收件人由该文件的 `publicKeys` 决定。
+Helper 直接返回完整的 `age.secrets.<name>` 值：
 
 ```nix
 age.secrets.oss-nix-cache-config =
   terminus.secrets.secret {
-    name = "oss-nix-cache-config";
+    name = "common/oss-nix-cache-config";
     owner = "allenyou";
     mode = "0400";
   };
 ```
 
-`users/<name>/meta.nix` 的密码配置二选一：`hashedPasswordSecret = "example-password"`
-对应 `secrets/example-password.age`；或直接写 `hashedPassword = "$6$..."`。两者不能同时设置。
+`users/<name>/meta.nix` 的密码配置二选一：`hashedPasswordSecret = "common/example-password"`
+对应 `secrets/common/example-password.age`；或直接写 `hashedPassword = "$6$..."`。两者不能同时设置。
 
 `terminus.secrets.secret` 默认用 `"${secretsDir}/<name>.age"` 保留 Nix store
-context；不要先用 `toString` 把 `secretsDir` 变成普通字符串，否则 Colmena 不会把
-`.age` 文件复制到目标机。
+context；`name` 可以包含子目录。不要先用 `toString` 把 `secretsDir` 变成普通字符串，
+否则 Colmena 不会把 `.age` 文件复制到目标机。
 
 编辑/检查/rekey 在 `secrets/` 下：
 
 ```bash
 cd secrets
-just edit example-token
+just edit services/example-token
+just list
 just check
 just rekey
 ```

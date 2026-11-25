@@ -1,8 +1,19 @@
 # Secrets
 
-`secretsDir` points at this directory by default. Every secret is exactly
-`<name>.age`; there is no common/host naming distinction. Which hosts can
-decrypt a file is decided solely by `secrets.nix` `publicKeys`.
+`secretsDir` points at this directory by default. Secret 文件按类别放在子目录中，
+但路径只是相对 `secretsDir` 的路径；文件相对路径必须与 `agenix-rules.nix` 的
+规则 key 一致。哪些主机能解密由该文件的 `publicKeys` 决定。
+
+## 目录归类
+
+- `common/`：所有主机共享的配置，例如 Nix 缓存和 aliyun CLI 凭据。
+- `dn42/`：DN42 主机的 WireGuard 私钥与 PSK，例如 `dn42/lax-rn-riose.priv.age`。
+- `nexusnet/`：NexusNet 主机的 WireGuard 私钥与 PSK，例如 `nexusnet/sha-ali-seldon.priv.age`。
+- `services/<service>/`：单个服务的凭据，例如 `services/grafana/db-password.age`、
+  `services/zitadel/master-key.age`。
+
+新增文件时放在哪个类别都可以，只要 `agenix-rules.nix` 里的规则 key 和
+`terminus.secrets.secret.name` 使用同一个相对路径。
 
 ## Local directory
 
@@ -28,7 +39,9 @@ mkFlake {
 ```
 
 Because `flake = false`, the input is already a directory. The helper appends
-`/<name>.age`; no extra path configuration is needed.
+`/<name>.age`; `name` may include a category subdirectory such as
+`nexusnet/sha-ali-seldon.priv`. No extra path configuration is
+needed.
 
 When using an external directory, edit/rekey it with that repository's own
 Justfile; the `justfile` in this directory is for local mode only.
@@ -42,7 +55,7 @@ sudo ssh-keygen -y -f /etc/ssh/ssh_host_ed25519_key
 ```
 
 Put the output in `keys.nix` `hostKeys.<host>`, add that key to the relevant
-rules in `secrets.nix`, then rekey:
+rules in `agenix-rules.nix`, then rekey:
 
 ```bash
 cd secrets
@@ -53,8 +66,12 @@ just rekey
 
 ```bash
 cd secrets
-just edit example-token
+just edit services/example-token
+just list
 ```
+
+`just list` 输出相对 `secrets/` 的路径；`just edit` 的 name 也使用同样的相对
+路径（不带 `.age`）。父目录不存在时会自动创建。
 
 The editor runs as the current user. `sudo` is only used for `agenix -d` and
 `agenix -e`. The temporary cleartext directory is created with `mktemp -d`
@@ -71,7 +88,7 @@ just check
 ```
 
 This runs `agenix -c` and verifies that each encrypted file's recipients match
-the `publicKeys` in `secrets.nix`.
+the `publicKeys` in `agenix-rules.nix`.
 
 ## Host identity
 

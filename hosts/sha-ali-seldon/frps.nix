@@ -5,7 +5,7 @@
 }:
 {
   age.secrets.frp-token = terminus.secrets.secret {
-    name = "frp-token.sha-ali-seldon";
+    name = "services/frp-token";
   };
 
   terminus.frp.server = {
