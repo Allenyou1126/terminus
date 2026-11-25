@@ -42,5 +42,17 @@ lib.optionalAttrs isClient {
       user = "allenyou";
       identityFile = "~/.ssh/id_ed25519";
     };
+    "github.com" = {
+      hostname = "ssh.github.com";
+      port = 443;
+      user = "git";
+      identityFile = "~/.ssh/id_ed25519";
+    };
+    "git.dn42.dev" = {
+      hostname = "git.dn42.dev";
+      port = 22;
+      user = "git";
+      identityFile = "~/.ssh/id_ed25519";
+    };
   };
 }

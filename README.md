@@ -3,7 +3,7 @@
 Terminus 是一套自包含的、参考 SnowveilOrg/Snowveil 目录约定的 NixOS 配置框架。
 目录结构直接映射为 flake outputs，显式区分“发现/元数据”和“NixOS/Home Manager 模块求值”。
 
-当前版本：`0.1.0`，已迁移 `sha-ali-gaal`、`home-ebeling` 与 `lax-rn-riose`；demo 已移除，其余主机尚未迁移。
+当前版本：`0.1.0`，已迁移 `sha-ali-gaal`、`home-ebeling`、`lax-rn-riose` 与 `lap-fallom`；demo 已移除，其余主机尚未迁移。
 
 ## 快速开始
 
@@ -273,6 +273,10 @@ sudo /nix/var/nix/profiles/system/bin/switch-to-configuration switch
 3. 按需加 `hardware.nix` / `disk.nix` / `network.nix`；
 4. 如需远程部署，在 meta 中写 `deployment.targetHost`，并把 deploy 公钥加入 `keys/deploy/`；
 5. 运行 `nix flake check path:. --no-build`。
+
+WSL 主机还需要在 `default.nix` 中 import `inputs.nixos-wsl.nixosModules.wsl`，并设置
+`wsl.enable = true` 与 `wsl.defaultUser`。flake 已提供 `nixos-wsl`（`release-26.05`）input，
+可直接使用；WSL 主机不需要 `hardware.nix`。
 
 ## 与 Snowveil 的差异（v1）
 

@@ -24,9 +24,6 @@
     ];
   };
 
-  # profiles 只选择模块文件；global preset 的 enable option 仍需显式打开。
-  terminus.nix.substituters.presets.global = true;
-
   terminus.nodeExporter = {
     enable = true;
     allowedSources = [ "106.14.99.198" ];

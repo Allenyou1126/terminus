@@ -1,6 +1,7 @@
 { ... }:
 {
   imports = [
+    ./_client.nix
     ./_git.nix
     ./_ssh.nix
   ];

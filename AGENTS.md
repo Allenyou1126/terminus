@@ -1,6 +1,8 @@
 # Terminus agent notes
 
 - Nixpkgs is pinned to `nixos-26.05`; Home Manager to `release-26.05`.
+- `nixos-wsl` is pinned to `release-26.05`; WSL hosts import
+  `inputs.nixos-wsl.nixosModules.wsl` (see `hosts/lap-fallom`).
 - `lib/` is the framework. `lib/secret.nix` is a secrets helper, **not** the
   agenix rules file; the rules live in `secrets/secrets.nix`.
 - `nixosConfigurations` are standard `nixosSystem` values. `colmenaHive` is

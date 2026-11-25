@@ -3,6 +3,7 @@
     "sha-ali-gaal"
     "home-ebeling"
     "lax-rn-riose"
+    "lap-fallom"
   ];
   uid = 1000;
   group = "users";
