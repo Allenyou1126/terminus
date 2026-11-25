@@ -5,6 +5,7 @@
     "home-ebeling"
     "lax-rn-riose"
     "lap-fallom"
+    "hkg-dog-darell"
   ];
   uid = 1000;
   group = "users";

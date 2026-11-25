@@ -3,7 +3,7 @@
 Terminus 是一套自包含的、参考 SnowveilOrg/Snowveil 目录约定的 NixOS 配置框架。
 目录结构直接映射为 flake outputs，显式区分“发现/元数据”和“NixOS/Home Manager 模块求值”。
 
-当前版本：`0.1.0`，已迁移 `sha-ali-gaal`、`sha-ali-seldon`、`home-ebeling`、`lax-rn-riose` 与 `lap-fallom`；demo 已移除，其余主机尚未迁移。
+当前版本：`0.1.0`，已迁移 `sha-ali-gaal`、`sha-ali-seldon`、`home-ebeling`、`lax-rn-riose`、`lap-fallom` 与 `hkg-dog-darell`；demo 已移除，其余主机尚未迁移。
 
 ## 快速开始
 
@@ -157,7 +157,9 @@ mkFlake {
 }
 ```
 
-Secret 文件用子目录归类（例如 `common/`、`dn42/`、`nexusnet/`、`services/<service>/`），文件相对路径
+Secret 文件用子目录归类（例如 `common/`、`dn42/`、`nexusnet/`），服务凭据放在
+`services/` 下：只有一个 secret 的服务直接用应用名命名（如 `services/miniflux.age`），
+有多个 secret 的服务才建子目录（如 `services/umami/app-secret.age`）。文件相对路径
 必须与 `secrets/agenix-rules.nix` 的规则 key 一致。收件人由该文件的 `publicKeys` 决定。
 Helper 直接返回完整的 `age.secrets.<name>` 值：
 
@@ -248,11 +250,16 @@ Colmena 会把 `targetHost`/`User`/`Port` 传给 `ssh`，SSH 配置负责选择�
 `security.sudo.extraRules` 的**最后**追加：
 
 ```text
-ALL ALL=(deploy,#1001) !ALL
+ALL ALL=(deploy,#50000) !ALL
 ```
 
-`#1001` 是 deploy 用户 UID。不要在后面再加允许 `runAs = "deploy"` 的规则；
+`#50000` 是 deploy 用户 UID。不要在后面再加允许 `runAs = "deploy"` 的规则；
 deploy key 本身等价 root，仍应按 root 凭据管理。
+
+已有主机从旧版本升级时，deploy 用户 UID 由 1001 变为 50000。由于
+`users.mutableUsers = false` 不会自动迁移 UID，请先在旧系统执行
+`sudo usermod -u 50000 deploy` 和 `sudo chown -R deploy:users /home/deploy`，
+再切换到新配置。
 
 ```bash
 nix run .#colmena -- apply test --on <host>

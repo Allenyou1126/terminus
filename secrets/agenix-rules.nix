@@ -56,4 +56,67 @@ in
     keys.hostKeys.sha-ali-seldon
   ]
   ++ keys.adminKeys;
+
+  # hkg-dog-darell：单 secret 应用直接以应用名命名文件。
+  "dn42/hkg-dog-darell.priv.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
+
+  "services/gotify.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
+  "services/miniflux.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
+  "services/nokoribi.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
+  "services/open-webui.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
+  "services/openviking.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
+  "services/recado.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
+  "services/sub-store.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
+  "services/umami/app-secret.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
+  "services/umami/database-url.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
+  "services/vaultwarden.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
+  "services/wakapi.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
+  "services/waline.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
+  "services/waline-zlight106.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
+  "services/webdav.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
 }

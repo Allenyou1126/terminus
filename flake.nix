@@ -23,6 +23,11 @@
       url = "github:nix-community/NixOS-WSL/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # hkg-dog-darell 的应用依赖。两个 input 在源仓库中不 follow nixpkgs，
+    # 这里保持同样的行为，并用源 flake.lock 中的精确 rev 固定版本。
+    nokoribi-agent.url = "github:Allenyou1126/nokoribi-agent/fe1440884f350aea6ea527cdd0277fd98051d3fa";
+    recado.url = "github:Allenyou1126/recado/c9432eafb7819f810c05688ff7c9813d41d0a74b";
   };
 
   outputs =

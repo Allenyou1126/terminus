@@ -9,8 +9,10 @@
 - `common/`：所有主机共享的配置，例如 Nix 缓存和 aliyun CLI 凭据。
 - `dn42/`：DN42 主机的 WireGuard 私钥与 PSK，例如 `dn42/lax-rn-riose.priv.age`。
 - `nexusnet/`：NexusNet 主机的 WireGuard 私钥与 PSK，例如 `nexusnet/sha-ali-seldon.priv.age`。
-- `services/<service>/`：单个服务的凭据，例如 `services/grafana/db-password.age`、
-  `services/zitadel/master-key.age`。
+- `services/<app>.age`：只有一个 secret 的服务，直接以应用名命名，例如
+  `services/miniflux.age`、`services/open-webui.age`。
+- `services/<service>/<name>.age`：有多个 secret 的服务才建子目录，例如
+  `services/grafana/db-password.age`、`services/umami/app-secret.age`。
 
 新增文件时放在哪个类别都可以，只要 `agenix-rules.nix` 里的规则 key 和
 `terminus.secrets.secret.name` 使用同一个相对路径。

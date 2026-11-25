@@ -31,7 +31,7 @@
   `~/.ssh/config` (`IdentityFile`/`IdentitiesOnly`); do not commit
   machine-specific `deployment.sshOptions` such as `-i /home/...`.
 - `lib/deploy.nix` appends a last sudoers rule denying all users
-  `runAs = "deploy,#1001"` (`!ALL`). Do not add a later rule allowing
+  `runAs = "deploy,#50000"` (`!ALL`). Do not add a later rule allowing
   `runAs = "deploy"`; that would re-enable `sudo -u deploy bash` and let
   restricted sudo users inherit deploy's NOPASSWD rule.
 - Roles only decide which module side files are imported; they never set

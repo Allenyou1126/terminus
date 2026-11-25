@@ -222,13 +222,85 @@
         "type": "github"
       }
     },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1792773339,
+        "narHash": "sha256-rZLrzrC6i+jnTAlvPZHogKDulY7WWDEv9hJeHieO7Zw=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "3ec636362e1816bc2f0888fa0fa2c69f1bc9e504",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_3": {
+      "locked": {
+        "lastModified": 1790046670,
+        "narHash": "sha256-MYiI+CzL0tuWgRPjGsKCDHqYs2T3OzMlMQWOYWG0qso=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "6774f7bc253789b113a4f39285dc0fa100abeacc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nokoribi-agent": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_2"
+      },
+      "locked": {
+        "lastModified": 1793542676,
+        "narHash": "sha256-WzFMI4z6VpWT6d1zD0SvpYTMScj78QNKdD4juFU8tYo=",
+        "owner": "Allenyou1126",
+        "repo": "nokoribi-agent",
+        "rev": "fe1440884f350aea6ea527cdd0277fd98051d3fa",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Allenyou1126",
+        "repo": "nokoribi-agent",
+        "rev": "fe1440884f350aea6ea527cdd0277fd98051d3fa",
+        "type": "github"
+      }
+    },
+    "recado": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_3"
+      },
+      "locked": {
+        "lastModified": 1792315461,
+        "narHash": "sha256-tBc+cf+X1hLL0Q/iPlhDPBj4oeEnRbunGrIwpyRwleI=",
+        "owner": "Allenyou1126",
+        "repo": "recado",
+        "rev": "c9432eafb7819f810c05688ff7c9813d41d0a74b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Allenyou1126",
+        "repo": "recado",
+        "rev": "c9432eafb7819f810c05688ff7c9813d41d0a74b",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "agenix": "agenix",
         "colmena": "colmena",
         "home-manager": "home-manager_2",
         "nixos-wsl": "nixos-wsl",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "nokoribi-agent": "nokoribi-agent",
+        "recado": "recado"
       }
     },
     "stable": {

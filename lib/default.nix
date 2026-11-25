@@ -74,7 +74,7 @@ in
       deployUser =
         colmenaConfig.deployUser or {
           name = "deploy";
-          uid = 1001;
+          uid = 50000;
         };
 
       homeConfig = args.home or { };
