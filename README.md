@@ -1,7 +1,7 @@
 # Terminus
 
 [![NixOS 26.05](https://img.shields.io/badge/NixOS-26.05-5277C3?logo=nixos&logoColor=white)](https://nixos.org)
-[![Terminus 0.1.0](https://img.shields.io/badge/Terminus-0.1.0-informational)](docs/README.md)
+[![Terminus 0.1.0](https://img.shields.io/badge/Terminus-0.1.0-informational)](docs/terminus/README.md)
 
 Terminus 是一套自包含的、参考 [Snowveil](https://github.com/SnowveilOrg/Snowveil) 目录约定的
 NixOS 配置框架，框架与配置同仓。当前版本 `0.1.0`，使用 NixOS `nixos-26.05`、Home Manager
@@ -25,7 +25,7 @@ NixOS 配置框架，框架与配置同仓。当前版本 `0.1.0`，使用 NixOS
 
 ## 文档
 
-完整框架文档见 **[docs/README.md](docs/README.md)**，包含目录结构、模块与 Profile、模块依赖、
+完整框架文档见 **[docs/terminus/README.md](docs/terminus/README.md)**，包含目录结构、模块与 Profile、模块依赖、
 Secrets、部署流程和 `mkFlake` 参考规范。
 
 ## 快速开始
@@ -74,12 +74,12 @@ nix run .#colmena -- apply --on @<TAG>
 ```
 
 首次远程部署前，如果目标机上还没有 `deploy` 用户，需要先在目标机本地部署一次。deploy 用户、
-SSH 配置、一致性检查与回滚注意事项见 [部署文档](docs/guide/deployment.md)。
+SSH 配置、一致性检查与回滚注意事项见 [部署文档](docs/terminus/guide/deployment.md)。
 
 ## Secrets
 
 加密文件与规则位于 [`secrets/`](secrets/)；仓库内不保存私钥或明文 secrets。编辑、检查与
-rekey 的流程见 [Secrets 文档](docs/guide/secrets.md)。
+rekey 的流程见 [Secrets 文档](docs/terminus/guide/secrets.md)。
 
 ## 参考
 

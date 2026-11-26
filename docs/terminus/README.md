@@ -7,9 +7,6 @@ Terminus 是一套自包含的 NixOS 配置框架：`lib/` 负责发现目录、
 [Snowveil](https://github.com/SnowveilOrg/Snowveil) 的目录约定，但框架本身与配置同仓，
 不是作为外部 flake input 引入的通用库。
 
-本目录是 Terminus 的完整文档。根目录的 [README](../README.md) 是速查，遇到冲突时以源码和
-这里的说明为准。
-
 ## 阅读路径
 
 | 目标 | 建议顺序 |
