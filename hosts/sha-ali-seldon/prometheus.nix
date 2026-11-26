@@ -103,6 +103,12 @@ in
             instance = "hkg-dog-darell";
             location = "hkg";
           })
+          (p.mkProbe "https://lotusland.allenyou.wang" {
+            public = "true";
+            description = "Allenyou's Lotusland";
+            instance = "hkg-dog-darell";
+            location = "hkg";
+          })
           (p.mkProbe "https://wakapi.allenyou.wang" {
             description = "Wakapi";
             instance = "hkg-dog-darell";
@@ -113,9 +119,14 @@ in
             instance = "hkg-dog-darell";
             location = "hkg";
           })
+          (p.mkProbe "https://sub-store.allenyou.wang" {
+            description = "Sub Store";
+            instance = "hkg-dog-darell";
+            location = "hkg";
+          })
           (p.mkProbe "https://auth.allenyou.top" {
             description = "ZITADEL Auth";
-            instance = "sha-ali-gaal";
+            instance = "sha-ali-seldon";
             location = "sha";
           })
           (p.mkProbe "https://lg.allenyou.wang" {
@@ -126,7 +137,7 @@ in
           })
           (p.mkProbe "https://grafana.allenyou.top" {
             description = "Grafana";
-            instance = "sha-ali-gaal";
+            instance = "sha-ali-seldon";
             location = "sha";
           })
           (p.mkProbe "https://umami.allenyou.wang" {
@@ -136,6 +147,11 @@ in
           })
           (p.mkProbe "https://ai.allenyou.wang" {
             description = "Open WebUI";
+            instance = "hkg-dog-darell";
+            location = "hkg";
+          })
+          (p.mkProbe "https://gotify.allenyou.wang" {
+            description = "Gotify";
             instance = "hkg-dog-darell";
             location = "hkg";
           })
@@ -149,6 +165,11 @@ in
             description = "Waline 评论系统";
             instance = "hkg-dog-darell";
             location = "hkg";
+          })
+          (p.mkProbe "https://dsh.allenyou.top" {
+            description = "Remote DeepSeek Harness";
+            instance = "home-ebeling";
+            location = "home";
           })
           (p.mkProbe "https://allenyou.top" {
             public = "true";
