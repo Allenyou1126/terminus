@@ -34,10 +34,17 @@
   `runAs = "deploy,#50000"` (`!ALL`). Do not add a later rule allowing
   `runAs = "deploy"`; that would re-enable `sudo -u deploy bash` and let
   restricted sudo users inherit deploy's NOPASSWD rule.
-- Roles only decide which module side files are imported; they never set
-  options. Modules with unconditional config apply on import; modules gated by
-  `mkIf config.terminus.*.enable` need the option set. `hosts/<name>/meta.nix`
-  `modules.<name> = true/false` is only an import override, not an option.
+- Profiles are directories: `profiles/<name>/meta.nix` (required, pure attrset) with
+  `requires` / `extends`, plus optional `nixos.nix` / `home.nix` which are ordinary
+  NixOS / Home Manager modules. `requires` imports modules; the side files provide
+  configuration. Use `lib.mkDefault` for values a host may override.
+- Every host implicitly applies `profiles/default/` (when present) plus
+  `meta.profiles`. Imported modules are the union of every selected profile's
+  `requires` and the host's `meta.requires`. Unselected modules' `options.nix` /
+  `default.nix` are not global.
+- `hosts/<name>/meta.nix` accepts `requires` for direct module imports. `roles` /
+  `role` / `modules` are rejected; module directories are namespaces, not roles.
+  A leading `_` has no special import meaning.
 - Modules may add `exports.nix` (plain attrset or `{ lib, inputs, self, ... }:`
   function). The framework merges exports into `terminus.exports`; exports are
   host-independent and duplicate keys are rejected. Do not require hosts to
@@ -48,21 +55,23 @@
 - `lib/users.nix` sets `users.mutableUsers = false` for every host.
   `users/<name>/meta.nix` supports `hashedPassword` or
   `hashedPasswordSecret` (mutually exclusive); do not set both.
-- `_common/*/home.nix` modules are imported into every embedded and standalone
-  Home Manager config. Keep user identity, SSH host aliases and
+- `profiles/default/meta.nix` lists the `_common/*` home modules, so they are imported
+  into every embedded and standalone Home Manager config. `profiles/default/home.nix`
+  (if present) is also applied to every home. Keep user identity, SSH host aliases and
   `home.stateVersion` in `homes/<user>/`.
-- Role-specific home modules live under `modules/<role>/.../home.nix`; e.g.
-  `client/ssh` only applies to client hosts. Home files themselves are not
-  role-filtered, so user-specific role-gated settings in
+- Home modules are imported only when a host profile selects them; e.g.
+  `client.ssh` is imported by the `client` profile. `homes/<user>/*.nix` is not
+  profile-filtered, so profile-gated user settings in
   `homes/<user>/default.nix` must use `lib.mkIf`/`lib.optionalAttrs` with
-  `terminus.host.roles` (and handle `terminus.host == null` for standalone
+  `terminus.host.profiles` (and handle `terminus.host == null` for standalone
   homes).
 - `homes/<user>/_*.nix` are fragments ignored by discovery; import them from
   `default.nix` or `<host>.nix`. Do not name fragments after hosts.
 - `server/node-exporter`, `server/bird-exporter`, `server/wireguard-exporter`,
-  `server/blackbox-exporter`, and `server/nginx-exporter` are server-only.
-  Their `options.nix` files are still loaded framework-wide by convention, but
-  the exporter config is only imported for the server role.
+  `server/blackbox-exporter`, and `server/nginx-exporter` are imported only by the
+  `server` profile. `server.certimate-ssh` is imported via `sha-ali-seldon`'s host
+  `requires`. Their options are not global; hosts that set them must select the
+  profile or require the module directly.
 - Verification:
   - `nix flake check path:. --no-build`
   - `nix build .#checks.x86_64-linux.terminus-colmena-consistency`

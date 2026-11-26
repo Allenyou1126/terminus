@@ -5,6 +5,8 @@ Terminus 是一套自包含的、参考 SnowveilOrg/Snowveil 目录约定的 Nix
 
 当前版本：`0.1.0`，已迁移 `sha-ali-gaal`、`sha-ali-seldon`、`home-ebeling`、`lax-rn-riose`、`lap-fallom` 与 `hkg-dog-darell`；demo 已移除，其余主机尚未迁移。
 
+> 完整框架文档见 [docs/](docs/README.md)。
+
 ## 快速开始
 
 ```bash
@@ -28,26 +30,37 @@ sudo nixos-rebuild switch --flake .#sha-ali-gaal
 远程 Colmena 部署：
 
 ```bash
-nix run .#colmena -- apply test --on sha-ali-gaal          # 先测试激活
-nix run .#colmena -- apply --on sha-ali-gaal              # 确认后正式切换
+nix run .#colmena -- apply test --on sha-ali-gaal          # 测试激活
+nix run .#colmena -- apply --on sha-ali-gaal              # 正式切换
 ```
 
 ## 目录约定
 
 ```text
 hosts/<name>/              nixosConfigurations.<name> + colmenaHive 节点
-  meta.nix                 system / description / roles / profiles / home / deployment
+  meta.nix                 system / description / profiles / requires / home / deployment
   default.nix              必需；主机模块
   hardware.nix             可选；自动导入
   disk.nix                 可选；自动导入
   network.nix              可选；自动导入
   <other>.nix              非 magic 文件不会被自动导入；需要时由 default.nix import
-users/<name>/              users.users/groups + Agenix 密码
-homes/<user>/default.nix   homeConfigurations.<user>
-homes/<user>/<host>.nix    homeConfigurations."<user>@<host>"
-homes/<user>/_*.nix        被 discovery 忽略；由 default/host 文件 imports
-modules/<path>/{options,default,nixos,home,exports}.nix
-profiles/<name>.nix
+users/<name>/              users.users/groups、其他用户特定定义
+homes/<user>/
+  default.nix              homeConfigurations.<user>
+  <host>.nix               homeConfigurations."<user>@<host>"
+  _*.nix                   被 discovery 忽略；由 default/host 文件 imports
+modules/<namespace>/<path>/
+  options.nix              公共的 Nix Options 定义。
+  default.nix              NixOS / Home Manager 共享的模块实现
+  nixos.nix                NixOS 模块实现
+  home.nix                 Home Manager 模块实现
+  exports.nix              导出的工具等
+  <other>.nix              非 magic 文件不会被自动导入
+profiles/<name>/
+  meta.nix                 requires / extends
+  nixos.nix                可选；NixOS 配置模块
+  home.nix                 可选；Home Manager 配置模块
+profiles/default/          特殊 Profile：存在时自动应用到每台主机和全局 home
 packages/<name>/           或 packages/<system>/<name>/
 overlays/<name>/           overlays.<name>
 apps/<name>/               apps.<system>.<name>
@@ -59,21 +72,17 @@ secrets/                   secretsDir（默认）
 keys/deploy/*.pub          远程部署用户公钥
 ```
 
-`modules/` 按角色过滤：`_common` 始终加载，`modules/<role>/` 只加载给声明了该 role 的主机；
-`options.nix` / `default.nix` 始终加载。模块目录的 `meta.nix` 支持 `requires` / `after` /
-`before` / `wants` / `conflicts`，组合时做稳定拓扑排序。
+`modules/` 的目录名只是命名空间，不再按角色或前缀过滤；一个模块是否导入由 Profile 和 Host
+决定。每台主机自动应用 `profiles/default/`（存在时）和自己的 `meta.profiles`；最终导入
+`default` + Profile `requires` + Host `requires` 的并集。只有被选中的模块才会导入 side 文件；
+未选中模块的 `options.nix` / `default.nix` 不会全局注入。
 
-角色只决定哪些 side 文件被导入，**不会设置模块 option**：无 option 门控、config 无条件的
-模块导入即生效；带 `mkIf config.xxx.enable` 的模块仍需显式开启。`hosts/<name>/meta.nix`
-的 `modules.<name> = true/false` 可以强制或跳过导入，但同样不会设置 option。
+Profile 是“`requires` + 配置”的组合：`meta.nix` 声明要导入的模块，`nixos.nix` / `home.nix`
+是普通 NixOS / Home Manager 模块。Profile 配置推荐用 `lib.mkDefault`，Host 可以覆盖。
+Host 也可以在 `meta.requires` 中直接导入只属于该主机的模块。
 
-当前拆分：`_common` 下有 `locale-timezone`、`nix-experimental`、`nix-trusted-users`、
-`nix-gc`、`nix-substituters`、`agenix-cli`、`basic-packages`、`motd`、`home-packages`、
-`home-bash`、`home-git`；`client` 下有 `ssh`、`deepseek-harness`；`server` 下有 `ssh`、
-`node-exporter`、`bird-exporter`、`wireguard-exporter`、`blackbox-exporter`、`nginx-exporter`、
-`nexusnet`、`postgresql`、`prometheus`、`deepseek-harness`、`certimate`、`frps`、`openviking`；
-`dn42` 下有 `bird2`、`bird-lg-proxy`、`coredns`、`wireguard`。DN42 主机需要声明 role `dn42`
-才会导入这些模块的 `nixos.nix`，且仍需显式打开各自的 `terminus.dn42.*.enable`。
+`hosts/<name>/meta.nix` 的 `roles` / `role` / `modules` 字段已移除，出现会报错；需要直接导入
+模块时用 `requires = [ ... ]`，或把模块写进 Profile。
 
 ### Module exports
 
@@ -108,9 +117,10 @@ terminus.nix.substituters.entries = [
 `priority = null` 表示原样使用 URL；默认 `cache.nixos.org` 和它的 key 仍由 NixOS 保留。
 私有签名 key 只留在主机，不进入仓库。
 
-`profiles = [ "cn" ]` / `[ "global" ]` 只决定导入哪些模块文件，不会打开
-`terminus.nix.substituters.presets.*`；主机仍需显式设置 `presets.cn = true`
-（`home-ebeling`、`sha-ali-gaal` 都这样做）。
+`profiles = [ "cn" ]` / `[ "global" ]` 通过 `profiles/cn/` / `profiles/global/` 导入对应
+preset 模块；它们的 `nixos.nix` 还会用 `lib.mkDefault true` 打开
+`terminus.nix.substituters.presets.cn`（或 `.global`）。需要关闭的主机在 `default.nix` 里写
+普通定义 `= false` 即可覆盖；没有选中这些 Profile 的主机则不存在对应 preset option。
 
 `homes/<user>/default.nix` 可以用 `imports = [ ./_git.nix ./_ssh.nix ];` 拆分；
 `_*.nix` 不会被 discovery 当作 host 专用 home，`<host>.nix` 仍保留给 host 专用文件。
@@ -119,7 +129,8 @@ terminus.nix.substituters.entries = [
 
 - `lib/discover.nix`：纯文件系统扫描；不求值任何 NixOS 配置。
 - `lib/metadata.nix`：`meta.nix` 校验与归一化。
-- `lib/modules.nix` / `lib/profiles.nix` / `lib/depgraph.nix`：角色、profile、依赖排序。
+- `lib/modules.nix` / `lib/profiles.nix` / `lib/depgraph.nix`：Profile 目录、requires 合并、
+  配置注入与依赖排序。
 - `lib/users.nix`：`users/<name>/meta.nix` → `users.users/groups`；框架统一设置
   `users.mutableUsers = false`，支持 `hashedPassword` / `hashedPasswordSecret`（互斥）。
 - `lib/secret.nix`：`secretsDir` 路径 helper；支持 `<category>/<name>.age` 相对路径。
@@ -226,22 +237,13 @@ sudo nixos-rebuild switch --flake .#<host>
 在部署机的 `~/.ssh/config` 中给目标主机加 `IdentityFile`，例如：
 
 ```sshconfig
-Host sha-ali-gaal.server.allenyou.wang
-    IdentityFile ~/.ssh/terminus_deploy
-    IdentitiesOnly yes
-```
-
-`home-ebeling` 只有内网地址（`192.168.100.60:2333`），部署机需要能路由到
-`192.168.100.0/24`（例如通过 WireGuard），并为这个地址配置同一把 deploy 私钥：
-
-```sshconfig
-Host 192.168.100.60
+Host sha-ali-gaal
     IdentityFile ~/.ssh/terminus_deploy
     IdentitiesOnly yes
 ```
 
 首次迁移时目标机上还没有 `deploy` 用户，需要先在目标机本地运行
-`sudo nixos-rebuild switch --flake .#home-ebeling`，之后才能用 Colmena。
+`sudo nixos-rebuild switch --flake .#<Host Name>`，之后才能用 Colmena。
 
 Colmena 会把 `targetHost`/`User`/`Port` 传给 `ssh`，SSH 配置负责选择私钥。
 `deployment.sshOptions` 仍可用于非机器相关的 ssh 参数，但不要把本机私钥路径提交进仓库。
@@ -256,11 +258,6 @@ ALL ALL=(deploy,#50000) !ALL
 `#50000` 是 deploy 用户 UID。不要在后面再加允许 `runAs = "deploy"` 的规则；
 deploy key 本身等价 root，仍应按 root 凭据管理。
 
-已有主机从旧版本升级时，deploy 用户 UID 由 1001 变为 50000。由于
-`users.mutableUsers = false` 不会自动迁移 UID，请先在旧系统执行
-`sudo usermod -u 50000 deploy` 和 `sudo chown -R deploy:users /home/deploy`，
-再切换到新配置。
-
 ```bash
 nix run .#colmena -- apply test --on <host>
 nix run .#colmena -- apply --on <host>
@@ -268,31 +265,17 @@ nix run .#colmena -- apply --on @<tag>
 ```
 
 Colmena 没有自动回滚。涉及 SSH、防火墙、bootloader 的变更新先用
-`apply test`，必要时用 `apply boot`，并准备控制台。手工回滚：
-
-```bash
-ssh <host>
-sudo nix-env --profile /nix/var/nix/profiles/system --rollback
-sudo /nix/var/nix/profiles/system/bin/switch-to-configuration switch
-```
+`apply test`，必要时用 `apply boot`，并准备控制台。
 
 ## 添加主机
 
-1. 创建 `hosts/<name>/meta.nix`，至少声明 `system`；
+1. 创建 `hosts/<name>/meta.nix`，至少声明 `system`，并按需声明 `profiles` / `requires`；
 2. 创建 `hosts/<name>/default.nix`；
 3. 按需加 `hardware.nix` / `disk.nix` / `network.nix`；
 4. 如需远程部署，在 meta 中写 `deployment.targetHost`，并把 deploy 公钥加入 `keys/deploy/`；
 5. 运行 `nix flake check path:. --no-build`。
 
-WSL 主机还需要在 `default.nix` 中 import `inputs.nixos-wsl.nixosModules.wsl`，并设置
-`wsl.enable = true` 与 `wsl.defaultUser`。flake 已提供 `nixos-wsl`（`release-26.05`）input，
-可直接使用；WSL 主机不需要 `hardware.nix`。
-
-## 与 Snowveil 的差异（v1）
-
-已实现：目录发现、hosts/users/homes、roles/profiles、模块依赖、packages/overlays/apps/
-shells/checks/formatter/lib、HM 嵌入/独立、Agenix、Colmena 桥接、discovery/一致性检查。
-
-暂未实现：images、flake schemas、`outputs.expected`/`outputs.eval`/完整 diagnostics、
-模块 groups/capabilities、`mkSystem`/`mkHome` 逃生舱、patches/source helper、
-每主机 overlay/package 自动选择、deploy-rs、sops-nix。
+WSL 主机在 meta 中声明 `profiles = [ "wsl" ]`（按需再加 `"client"`）；`wsl.base` 模块会导入
+`inputs.nixos-wsl.nixosModules.wsl` 并设置 `wsl.enable = true`。主机 `default.nix` 只需设置
+`wsl.defaultUser`。flake 已提供 `nixos-wsl`（`release-26.05`）input，WSL 主机不需要
+`hardware.nix`。
