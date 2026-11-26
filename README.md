@@ -8,16 +8,7 @@ NixOS 配置框架，框架与配置同仓。当前版本 `0.1.0`，使用 NixOS
 `release-26.05`、[Colmena](https://github.com/nix-community/colmena) 与
 [agenix](https://github.com/ryantm/agenix)。
 
-本仓库目前管理 6 台 `x86_64-linux` 主机：
-
-| 主机 | 用途 |
-| --- | --- |
-| `sha-ali-gaal` | 测试服务器 |
-| `sha-ali-seldon` | 网络网关服务器 |
-| `hkg-dog-darell` | 应用服务器 |
-| `home-ebeling` | Homelab 服务器 |
-| `lax-rn-riose` | DN42 服务器 |
-| `lap-fallom` | WSL 客户端笔记本 |
+本仓库目前管理了我的主要 Linux 设备。详情请参见 [docs/hosts.md](docs/hosts.md)。
 
 > [!IMPORTANT]
 > 这是个人配置仓库，包含针对特定硬件的配置与加密的 secrets。请勿直接部署到其他机器；
@@ -44,6 +35,12 @@ nix fmt                             # 格式化
 `just test <host>`、`just apply <host>`、`just fmt`），`just --list` 可查看全部。
 
 ## 部署
+
+### 从零开始
+
+参见 [docs/bootstrap.md](docs/bootstrap.md)。
+
+### 在已有 NixOS 系统上部署
 
 本机（在目标机执行）：
 
