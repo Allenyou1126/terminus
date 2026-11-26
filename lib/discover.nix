@@ -290,6 +290,32 @@ let
 
   profiles = profilesLib.load { dir = at "profiles"; };
 
+  _profileRequires = lib.unique (
+    lib.concatMap (profile: profile.requires) (lib.attrValues profiles.resolved)
+  );
+
+  _checkModuleRequires =
+    kind: name:
+    if !(lib.hasAttr name modulesByName) then
+      errors.unknownModule kind name
+    else if modulesByName.${name}.side.nixos == [ ] && modulesByName.${name}.side.home == [ ] then
+      errors.moduleWithoutSideFiles name
+    else
+      null;
+
+  _checkProfileRequires = map (_checkModuleRequires "profile requires") _profileRequires;
+
+  _checkHostRequires = map (
+    host: map (_checkModuleRequires "host requires") host.meta.requires
+  ) hosts;
+
+  _checkHostProfiles = map (
+    host:
+    map (
+      name: if lib.hasAttr name profiles.resolved then null else errors.unknownProfile name
+    ) host.meta.profiles
+  ) hosts;
+
   # ---------------------------------------------------------------------------
   # packages/
   # ---------------------------------------------------------------------------
@@ -419,6 +445,9 @@ lib.deepSeq
     _checkDuplicateModules
     _checkDuplicatePackages
     _validateHomeUsers
+    _checkProfileRequires
+    _checkHostRequires
+    _checkHostProfiles
   ]
   {
     inherit

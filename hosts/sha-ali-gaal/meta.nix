@@ -2,11 +2,8 @@
   system = "x86_64-linux";
   description = "Test Server";
 
-  roles = [
-    "server"
-  ];
-
   profiles = [
+    "server"
     "cn"
   ];
 

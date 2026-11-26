@@ -1,56 +1,19 @@
-# Role filtering, profiles, host overrides and module dependency ordering.
+# Profile-based module selection, dependency ordering and registry generation.
 { lib }:
 let
   inherit (builtins)
-    attrNames
-    baseNameOf
     concatMap
-    elem
     filter
-    head
-    listToAttrs
+    hasAttr
     mapAttrs
     ;
 
   errors = import ./internal/errors.nix { inherit lib; };
   depgraph = import ./depgraph.nix { inherit lib; };
 
-  fileKind = path: lib.removeSuffix ".nix" (baseNameOf path);
-
-  # Roles only decide which side files are imported. They never set options:
-  # a role-selected module with `mkIf option` stays disabled until the option
-  # is set. Module-level meta.*.enable and host meta.modules are separate
-  # import-selection mechanisms.
-  roleAllowed =
-    host: module:
-    let
-      roles = host.meta.roles;
-      first = head (lib.splitString "." module.name);
-    in
-    if roles == null then true else lib.hasPrefix "_" first || elem first roles;
-
-  # Files that would be injected by role filtering alone.
-  roleFiles =
-    host: side: module:
-    filter (
-      path:
-      let
-        kind = fileKind path;
-      in
-      if kind == "options" || kind == "default" then true else roleAllowed host module
-    ) module.side.${side};
-
-  sideEnabled = side: module: module.meta.${side}.enable;
-
-  profileMembers =
-    host: side:
-    concatMap (
-      name:
-      let
-        profile = host.profilesResolved.${name} or (errors.unknownProfile name);
-      in
-      profile.common ++ profile.${side}
-    ) host.meta.profiles;
+  # `profiles/default/` is special: when it exists it is applied to every
+  # host without being listed in host meta.
+  defaultProfile = "default";
 
   moduleMeta =
     side: module:
@@ -66,39 +29,32 @@ let
       conflicts = shared.conflicts ++ own.conflicts;
     };
 
+  # Profiles applied to a host: the implicit default profile (when present)
+  # plus the host's declared profiles, in declaration order.
+  selectedProfiles =
+    host:
+    let
+      names = lib.unique (
+        lib.optional (hasAttr defaultProfile host.profilesResolved) defaultProfile ++ host.meta.profiles
+      );
+    in
+    map (name: host.profilesResolved.${name} or (errors.unknownProfile name)) names;
+
+  # Modules imported by the selected profiles plus host-level requires.
+  requestedModules =
+    host:
+    lib.unique (concatMap (profile: profile.requires) (selectedProfiles host) ++ host.meta.requires);
+
   selectSide =
     host: side:
     let
       modules = lib.filterAttrs (
-        _name: module: module.side.${side} != [ ] && sideEnabled side module
+        _name: module: module.side.${side} != [ ] && module.meta.${side}.enable
       ) host.modulesByName;
 
-      base = filter (name: roleFiles host side modules.${name} != [ ]) (attrNames modules);
+      members = requestedModules host;
 
-      members = profileMembers host side;
-
-      _validateMembers = map (
-        name: if modules ? ${name} then null else errors.unknownModule "profile module" name
-      ) members;
-
-      candidates = lib.unique (base ++ members ++ attrNames host.meta.modules);
-
-      explicitlyEnabled = lib.unique (
-        members ++ filter (name: (host.meta.modules.${name} or null) == true) (attrNames host.meta.modules)
-      );
-
-      selected = filter (
-        name:
-        let
-          override = host.meta.modules.${name} or null;
-        in
-        if override == false then
-          false
-        else if override == true then
-          modules ? ${name}
-        else
-          elem name (base ++ members)
-      ) candidates;
+      selected = filter (name: hasAttr name modules) members;
 
       graph = mapAttrs (_name: module: moduleMeta side module) modules;
 
@@ -107,19 +63,12 @@ let
         enabled = selected;
       };
 
-      imports = concatMap (
-        name:
-        if elem name explicitlyEnabled then
-          modules.${name}.side.${side}
-        else
-          roleFiles host side modules.${name}
-      ) order;
+      imports = concatMap (name: modules.${name}.side.${side}) order;
+
+      profileConfig = lib.unique (concatMap (profile: profile.${side}) (selectedProfiles host));
     in
-    lib.deepSeq _validateMembers {
-      inherit
-        imports
-        order
-        ;
+    {
+      inherit imports order profileConfig;
       names = order;
     };
 in

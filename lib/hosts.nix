@@ -149,7 +149,7 @@ in
                 inherit discovery;
                 host = host';
                 users = homeUsers;
-                homeImportsFor = _user: selected.home.imports ++ extraHomeModules;
+                homeImportsFor = _user: selected.home.imports ++ selected.home.profileConfig ++ extraHomeModules;
                 specialArgs = homeSpecialArgs';
               }
             else
@@ -191,6 +191,7 @@ in
           ++ lib.optional (deployUserModule != null) deployUserModule
           ++ lib.optional (embeddedHome != null) embeddedHome
           ++ selected.nixos.imports
+          ++ selected.nixos.profileConfig
           ++ host'.modulePaths
           ++ extraNixosModules
           ++ [
@@ -206,7 +207,7 @@ in
           inherit specialArgs;
           homeSpecialArgs = homeSpecialArgs';
           modules = nixosImports;
-          homeImports = selected.home.imports ++ extraHomeModules;
+          homeImports = selected.home.imports ++ selected.home.profileConfig ++ extraHomeModules;
           homeUsers = homeUsers;
           embed = hostEmbed;
           useGlobalPkgs = hostUseGlobalPkgs;
@@ -226,7 +227,7 @@ in
             host = globalHost;
           };
         in
-        selected.home.imports ++ extraHomeModules;
+        selected.home.imports ++ selected.home.profileConfig ++ extraHomeModules;
 
       globalHomeSpecialArgs = {
         inherit inputs self;

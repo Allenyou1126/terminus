@@ -2,11 +2,8 @@
   system = "x86_64-linux";
   description = "Application server.";
 
-  roles = [
-    "server"
-  ];
-
   profiles = [
+    "server"
     "cn"
   ];
 

@@ -27,6 +27,13 @@ in
         }) discovery.homes;
         modules = attrNames discovery.modulesByName;
         profiles = discovery.profiles.names;
+        profileRequires = mapAttrs (_name: profile: profile.requires) discovery.profiles.resolved;
+        profileConfig = mapAttrs (_name: profile: {
+          nixos = profile.nixos != [ ];
+          home = profile.home != [ ];
+        }) discovery.profiles.resolved;
+        hostProfiles = mapAttrs (_name: host: host.meta.profiles) discovery.hostsByName;
+        hostRequires = mapAttrs (_name: host: host.meta.requires) discovery.hostsByName;
         packages = map (package: package.name) discovery.packages;
         overlays = map (overlay: overlay.name) discovery.overlays;
         apps = map (app: app.name) discovery.apps;

@@ -20,6 +20,32 @@
         { system = "x86_64-linux"; }
     '';
 
+  removedHostField =
+    file: field: hint:
+    throw ''
+      terminus: unsupported host meta field '${field}'
+        file: ${toString file}
+        hint: ${hint}
+    '';
+
+  moduleWithoutSideFiles =
+    name: throw "terminus: module '${name}' has no NixOS or Home Manager side files";
+
+  legacyProfileFile =
+    name:
+    throw ''
+      terminus: legacy profile file 'profiles/${name}.nix' is no longer supported
+      create profiles/${name}/meta.nix instead, with optional nixos.nix / home.nix
+    '';
+
+  unsupportedProfileField =
+    file: field: hint:
+    throw ''
+      terminus: unsupported profile meta field '${field}'
+        file: ${toString file}
+        hint: ${hint}
+    '';
+
   unknownHost =
     host:
     throw ''

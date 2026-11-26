@@ -2,13 +2,11 @@
 { lib }:
 let
   inherit (builtins)
-    attrNames
     isAttrs
     isBool
     isInt
     isList
     isString
-    listToAttrs
     typeOf
     ;
 
@@ -38,50 +36,6 @@ let
       value
     else
       errors.invalidMeta file "${field} must be a boolean or null" (typeOf value);
-
-  normalizeOverrides =
-    file: value:
-    let
-      flatten =
-        prefix: attrs:
-        lib.concatMap (
-          name:
-          let
-            v = attrs.${name};
-            path = if prefix == "" then name else "${prefix}.${name}";
-          in
-          if isBool v then
-            [
-              {
-                inherit path;
-                inherit v;
-              }
-            ]
-          else if isAttrs v && v ? enable then
-            if isBool v.enable then
-              [
-                {
-                  inherit path;
-                  v = v.enable;
-                }
-              ]
-            else
-              errors.invalidMeta file "modules.${path}.enable must be a boolean" (typeOf v.enable)
-          else if isAttrs v then
-            flatten path v
-          else
-            errors.invalidMeta file "modules.${path} must be a boolean or an attribute set" (typeOf v)
-        ) (attrNames attrs);
-    in
-    if !isAttrs value then
-      errors.invalidMeta file "modules must be an attribute set" (typeOf value)
-    else
-      listToAttrs (
-        map (x: {
-          name = x.path;
-          value = x.v;
-        }) (flatten "" value)
-      );
 
   normalizeModuleMeta =
     file: meta:
@@ -126,23 +80,19 @@ let
     let
       system = meta.system or (errors.missingHostSystem (toString file));
 
-      roles =
+      profiles = if meta ? profiles then stringList file "profiles" meta.profiles else [ ];
+
+      requires = if meta ? requires then stringList file "requires" meta.requires else [ ];
+
+      removedField =
         if meta ? roles then
-          if meta.roles == null then
-            null
-          else if isString meta.roles then
-            [ meta.roles ]
-          else
-            stringList file "roles" meta.roles
+          "roles"
         else if meta ? role then
-          if isString meta.role then
-            [ meta.role ]
-          else
-            errors.invalidMeta file "role must be a string" (typeOf meta.role)
+          "role"
+        else if meta ? modules then
+          "modules"
         else
           null;
-
-      profiles = if meta ? profiles then stringList file "profiles" meta.profiles else [ ];
 
       description =
         if meta ? description then
@@ -226,19 +176,52 @@ let
                 null;
           };
     in
-    {
-      inherit
-        system
-        roles
-        profiles
-        description
-        home
-        secrets
-        deployment
-        ;
-      modules = if meta ? modules then normalizeOverrides file meta.modules else { };
-      raw = meta;
-    };
+    if removedField == "roles" || removedField == "role" then
+      errors.removedHostField file removedField (
+        "declare module groups in `profiles` instead, e.g. profiles = [ \"server\" ];"
+      )
+    else if removedField == "modules" then
+      errors.removedHostField file "modules" (
+        "host-level module overrides were removed; use `requires = [ ... ]` for direct imports or select a profile"
+      )
+    else
+      {
+        inherit
+          system
+          profiles
+          requires
+          description
+          home
+          secrets
+          deployment
+          ;
+        raw = meta;
+      };
+
+  normalizeProfileMeta =
+    file: meta:
+    let
+      requires = stringList file "requires" (meta.requires or [ ]);
+      extends = stringList file "extends" (meta.extends or [ ]);
+      misplaced = lib.filter (field: lib.hasAttr field meta) [
+        "modules"
+        "common"
+        "nixos"
+        "home"
+      ];
+      hint =
+        if lib.hasAttr "modules" meta then
+          "rename `modules` to `requires`; profile config belongs in nixos.nix / home.nix"
+        else
+          "profile config belongs in nixos.nix / home.nix";
+    in
+    if misplaced != [ ] then
+      errors.unsupportedProfileField file (lib.concatStringsSep ", " misplaced) hint
+    else
+      {
+        inherit requires extends;
+        raw = meta;
+      };
 
   normalizeUserMeta =
     file: meta:
@@ -338,9 +321,9 @@ in
     readMeta
     readOptionalMeta
     stringList
-    normalizeOverrides
     normalizeModuleMeta
     normalizeHostMeta
+    normalizeProfileMeta
     normalizeUserMeta
     normalizeOutputMeta
     ;

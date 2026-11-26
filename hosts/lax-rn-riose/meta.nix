@@ -2,12 +2,9 @@
   system = "x86_64-linux";
   description = "DN42 server";
 
-  roles = [
+  profiles = [
     "server"
     "dn42"
-  ];
-
-  profiles = [
     "global"
   ];
 

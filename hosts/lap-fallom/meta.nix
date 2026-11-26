@@ -2,12 +2,9 @@
   system = "x86_64-linux";
   description = "Client Laptop running in WSL.";
 
-  roles = [
+  profiles = [
     "client"
     "wsl"
-  ];
-
-  profiles = [
     "cn"
   ];
 

@@ -4,13 +4,14 @@
   ...
 }:
 let
-  # `homes/<user>/default.nix` is imported on every host; role filtering only
-  # applies to modules. Treat a standalone home (no host) and a host with
-  # roles = null (all roles) as client-capable, matching module selection.
-  isClient =
-    terminus.host == null || terminus.host.roles == null || builtins.elem "client" terminus.host.roles;
+  # `homes/<user>/default.nix` is imported on every host; profile filtering
+  # only applies to modules. A standalone home (no host) is treated as
+  # client-capable because only the implicit default profile is applied there.
+  isClient = terminus.host == null || builtins.elem "client" terminus.host.profiles;
 in
 lib.optionalAttrs isClient {
+  programs.ssh.enable = true;
+
   programs.ssh.settings = {
     hkg-dog-darell = {
       hostname = "hkg-dog-darell.server.allenyou.wang";

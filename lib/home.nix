@@ -87,7 +87,8 @@ in
     };
 
   # A synthetic host used for the global `homeConfigurations.<user>` output:
-  # roles are not host-specific there, so every home module is eligible.
+  # there is no host-specific profile list there, so only the implicit
+  # `profiles/default.nix` (when present) is applied.
   globalHost =
     {
       name,
@@ -96,9 +97,8 @@ in
     {
       inherit name system;
       meta = {
-        roles = null;
         profiles = [ ];
-        modules = { };
+        requires = [ ];
       };
     };
 }

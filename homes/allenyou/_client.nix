@@ -5,9 +5,7 @@
   ...
 }:
 let
-  isClientHost =
-    terminus.host != null
-    && (terminus.host.roles == null || builtins.elem "client" terminus.host.roles);
+  isClientHost = terminus.host != null && builtins.elem "client" terminus.host.profiles;
 in
 lib.optionalAttrs isClientHost {
   home.packages = with pkgs; [

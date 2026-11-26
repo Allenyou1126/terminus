@@ -2,11 +2,8 @@
   system = "x86_64-linux";
   description = "Homelab server";
 
-  roles = [
-    "server"
-  ];
-
   profiles = [
+    "server"
     "cn"
   ];
 
