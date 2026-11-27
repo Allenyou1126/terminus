@@ -6,6 +6,7 @@
     "server.blackbox-exporter"
     "server.certimate"
     "server.deepseek-harness"
+    "server.donetick"
     "server.frps"
     "server.nexusnet"
     "server.nginx-exporter"
