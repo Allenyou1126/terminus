@@ -18,8 +18,8 @@ in
     owner = "donetick";
     group = "donetick";
   };
-  age.secrets.donetick-oauth2-secret = terminus.secrets.secret {
-    name = "services/donetick/oauth2-secret";
+  age.secrets.donetick-oauth-secret = terminus.secrets.secret {
+    name = "services/donetick/oauth-secret";
     owner = "donetick";
     group = "donetick";
   };
@@ -65,7 +65,7 @@ in
 
     oauth2 = {
       clientId = "401446959094765766";
-      clientSecretFile = config.age.secrets.donetick-oauth2-secret.path;
+      clientSecretFile = config.age.secrets.donetick-oauth-secret.path;
       redirectUrl = "${publicHost}/api/v1/oauth2/callback";
       scopes = [
         "sub"
