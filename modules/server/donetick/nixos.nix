@@ -54,7 +54,14 @@ let
       rate_limit = cfg.server.rateLimit;
       read_timeout = cfg.server.readTimeout;
       write_timeout = cfg.server.writeTimeout;
-      cors_allow_origins = cfg.server.corsAllowOrigins;
+      cors_allow_origins = cfg.server.corsAllowOrigins ++ [
+        "http://localhost:5173"
+        "http://localhost:7926"
+        # the below are required for the android app to work
+        "https://localhost"
+        "http://localhost"
+        "capacitor://localhost"
+      ];
       serve_frontend = cfg.server.serveFrontend;
     }
     // lib.optionalAttrs (cfg.server.publicHost != null) {
