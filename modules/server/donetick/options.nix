@@ -162,12 +162,9 @@ in
     general = {
       name = lib.mkOption {
         type = lib.types.str;
-        default = "selfhosted";
+        default = "donetick";
         description = ''
           实例名，对应 `name`（官方 Configuration 的 General 段）。
-
-          不要设为 `local`：源码对 `local` 环境会跳过 JWT secret 强度校验，
-          本模块会断言禁止。
         '';
       };
 
