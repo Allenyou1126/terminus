@@ -106,12 +106,17 @@ in
       proxyWebsockets = true;
       recommendedProxySettings = true;
       extraConfig = ''
-        add_header 'Access-Control-Allow-Origin' '*' always;
-        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE' always;
-        add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,Accept,Origin,User-Agent,DNT,Cache-Control,X-Requested-With' always;
-
-        # 处理预检请求
+        add_header 'Access-Control-Allow-Origin' $http_origin;
+        add_header 'Access-Control-Allow-Credentials' 'true';
+        add_header 'Access-Control-Allow-Methods' 'GET, PUT, DELETE, POST, OPTIONS';
+        add_header 'Access-Control-Allow-Headers' $http_access_control_request_headers;
+        add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range';
         if ($request_method = 'OPTIONS') {
+          add_header 'Access-Control-Allow-Origin' $http_origin;
+          add_header 'Access-Control-Allow-Methods' 'GET, PUT, DELETE, POST, OPTIONS';
+          add_header 'Access-Control-Allow-Headers' $http_access_control_request_headers;
+          add_header 'Access-Control-Allow-Credentials' 'true';
+          add_header 'Access-Control-Max-Age' 1728000;
           return 204;
         }
       '';
