@@ -119,4 +119,24 @@ in
     keys.hostKeys.hkg-dog-darell
   ]
   ++ keys.adminKeys;
+  "services/donetick/database-password.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
+  "services/donetick/smtp-password.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
+  "services/donetick/oauth-secret.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
+  "services/donetick/s3-access-key.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
+  "services/donetick/s3-secret.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
 }

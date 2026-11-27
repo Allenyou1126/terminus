@@ -24,6 +24,7 @@
     ./apps/nokoribi.nix
     ./apps/openviking.nix
     ./apps/recado.nix
+    ./apps/donetick.nix
   ];
 
   boot.loader.grub.enable = true;
