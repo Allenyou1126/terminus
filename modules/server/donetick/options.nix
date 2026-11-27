@@ -9,7 +9,7 @@
 #
 # - 只支持 selfhost：DT_ENV 固定为 selfhosted，不提供 configEnv。
 # - is_done_tick_dot_com 强制为 false，不暴露为选项。
-# - 不提供 Stripe 配置；RevenueCat / IAP / FCM / Bridge / MCP / Realtime / MFA /
+# - 不提供 Stripe 配置；RevenueCat / IAP / FCM / Bridge / Realtime / MFA /
 #   Logging / feature_limits 等章节也未纳入，出处见仓库说明。
 # - 秘密（jwt / 数据库密码 / email key / OAuth2 client secret / S3 凭据 /
 #   Telegram / Pushover token）一律用 *File 选项，由启动脚本在运行期读入并注入
@@ -671,6 +671,22 @@ in
 
           ⚠️ **0 会拒绝所有上传**（`file.Size > max_file_size`），因此默认
           10 MiB。官方 Storage 文档示例是 2 MiB。
+        '';
+      };
+    };
+
+    mcp = {
+      enabled = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = ''
+          MCP（Model Context Protocol）服务端开关，对应 `mcp.enabled`
+          （README「MCP Server」；也可用 `DT_MCP_ENABLED` 环境变量设置）。
+
+          开启后 Donetick 在 `/mcp` 提供 Streamable HTTP MCP 端点，AI 客户端用
+          Donetick API token 认证（`Authorization: Bearer <token>` 或
+          `secretkey` 头）。带 `Origin` 头的请求还会要求 Origin 是本服务地址，
+          或在 {option}`terminus.donetick.server.corsAllowOrigins` 中。
         '';
       };
     };

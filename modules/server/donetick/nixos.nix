@@ -120,6 +120,9 @@ let
     # selfhosted 模板一致，待上游修复后即生效；当前若要关闭，请在首次启动后
     # 通过 Web UI 断开 Bridge（持久化在 bridge_settings 表）。
     bridge.enabled = false;
+
+    # MCP（Model Context Protocol）服务端；默认关闭，开启后端点为 /mcp。
+    mcp.enabled = cfg.mcp.enabled;
   };
 
   configFile = yamlFormat.generate "donetick-selfhosted.yaml" generatedSettings;

@@ -40,6 +40,9 @@ in
 
     general.name = "Allenyou TODO";
 
+    # MCP Server：AI 客户端通过 /mcp（Bearer API token）管理任务
+    mcp.enabled = true;
+
     database = {
       type = "postgres";
       host = "127.0.0.1";
