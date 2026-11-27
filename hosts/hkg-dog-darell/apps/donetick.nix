@@ -10,27 +10,27 @@ in
 {
   age.secrets.donetick-database-password = terminus.secrets.secret {
     name = "services/donetick/database-password";
-    user = "donetick";
+    owner = "donetick";
     group = "donetick";
   };
   age.secrets.donetick-smtp-password = terminus.secrets.secret {
     name = "services/donetick/smtp-password";
-    user = "donetick";
+    owner = "donetick";
     group = "donetick";
   };
   age.secrets.donetick-oauth2-secret = terminus.secrets.secret {
     name = "services/donetick/oauth2-secret";
-    user = "donetick";
+    owner = "donetick";
     group = "donetick";
   };
   age.secrets.donetick-s3-access-key = terminus.secrets.secret {
     name = "services/donetick/s3-access-key";
-    user = "donetick";
+    owner = "donetick";
     group = "donetick";
   };
   age.secrets.donetick-s3-secret = terminus.secrets.secret {
     name = "services/donetick/s3-secret";
-    user = "donetick";
+    owner = "donetick";
     group = "donetick";
   };
 
