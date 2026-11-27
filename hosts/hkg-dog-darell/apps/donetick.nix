@@ -105,6 +105,16 @@ in
       proxyPass = "http://127.0.0.1:58390";
       proxyWebsockets = true;
       recommendedProxySettings = true;
+      extraConfig = ''
+        add_header 'Access-Control-Allow-Origin' '*' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE' always;
+        add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,Accept,Origin,User-Agent,DNT,Cache-Control,X-Requested-With' always;
+
+        # 处理预检请求
+        if ($request_method = 'OPTIONS') {
+          return 204;
+        }
+      '';
     };
     sslCertificate = "/var/ssl/allenyou.wang.crt";
     sslCertificateKey = "/var/ssl/allenyou.wang.key";
