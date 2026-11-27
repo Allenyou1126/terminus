@@ -98,6 +98,8 @@ let
     webhook = {
       timeout = cfg.webhook.timeout;
       queue_size = cfg.webhook.queueSize;
+      # 空占位：真实密钥由启动脚本通过 DT_WEBHOOK_SIGNING_SECRET 注入。
+      signing_secret = "";
     };
 
     storage = {
@@ -186,6 +188,11 @@ let
       option = "terminus.donetick.notifications.pushover.tokenFile";
       file = cfg.notifications.pushover.tokenFile;
     }
+    {
+      env = "DT_WEBHOOK_SIGNING_SECRET";
+      option = "terminus.donetick.webhook.signingSecretFile";
+      file = cfg.webhook.signingSecretFile;
+    }
   ];
 
   readSecret = spec: ''
@@ -247,6 +254,7 @@ let
     "DT_STORAGE_SECRET_KEY"
     "DONETICK_TELEGRAM_TOKEN"
     "DONETICK_PUSHOVER_TOKEN"
+    "DT_WEBHOOK_SIGNING_SECRET"
   ];
 
   conflictingEnvironment = lib.filter (key: cfg.environment ? ${key}) reservedEnvironmentKeys;

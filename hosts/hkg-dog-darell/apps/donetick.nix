@@ -33,6 +33,11 @@ in
     owner = "donetick";
     group = "donetick";
   };
+  age.secrets.donetick-webhook-signing-secret = terminus.secrets.secret {
+    name = "services/donetick/webhook-signing-secret";
+    owner = "donetick";
+    group = "donetick";
+  };
 
   terminus.donetick = {
     enable = true;
@@ -94,6 +99,10 @@ in
       name = "Allenyou Auth";
       adminGroups = [ "todo.admin" ];
       managerGroups = [ "todo.manager" ];
+    };
+
+    webhook = {
+      signingSecretFile = config.age.secrets.donetick-webhook-signing-secret.path;
     };
 
     storage = {

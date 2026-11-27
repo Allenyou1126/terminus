@@ -139,4 +139,8 @@ in
     keys.hostKeys.hkg-dog-darell
   ]
   ++ keys.adminKeys;
+  "services/donetick/webhook-signing-secret.age".publicKeys = [
+    keys.hostKeys.hkg-dog-darell
+  ]
+  ++ keys.adminKeys;
 }

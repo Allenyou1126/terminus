@@ -599,6 +599,21 @@ in
         default = 100;
         description = "webhook 队列长度，对应 `webhook.queue_size`。";
       };
+
+      signingSecretFile = lib.mkOption {
+        type = secretFileType;
+        default = null;
+        example = "/run/secrets/donetick-webhook-signing-secret";
+        description = ''
+          出站 webhook 的 HMAC-SHA256 签名密钥文件，对应
+          `webhook.signing_secret`；启动脚本注入 `DT_WEBHOOK_SIGNING_SECRET`。
+
+          设置后每次投递都会带
+          `X-Donetick-Signature: t=<unix>,v1=<hex>`（对
+          `"<unix>.<body>"` 做 HMAC-SHA256）。接收端应校验签名，并拒绝时间戳
+          过旧的请求。留空则不签名。
+        '';
+      };
     };
 
     storage = {
