@@ -66,10 +66,20 @@ in
       appHost = publicHost;
     };
 
+    # ZITADEL 应用必须是 Native 类型：code grant 下自定义 scheme 只对 native 允许
+    # （否则报 CustomOnlyForNative），且应用类型创建后不能修改。Redirect URIs
+    # 需要同时登记：
+    #   ${publicHost}/auth/oauth2   （Web 前端回调）
+    #   donetick://auth/oauth2      （Android / iOS App）
+    # 换成 Native 应用后，用它的 Client ID 替换 clientId，并重新加密
+    # services/donetick/oauth-secret.age；Auth Method 选 Basic 或 Post
+    # （Donetick 要求 ClientSecret 非空；ZITADEL 的 PKCE/None 认证方式不签发
+    # secret，会让 OIDC 被禁用——下面的 pkce 开关只控制是否下发 PKCE 参数）。
     oauth2 = {
-      clientId = "401446959094765766";
+      clientId = "401457800212977862";
       clientSecretFile = config.age.secrets.donetick-oauth-secret.path;
-      redirectUrl = "${publicHost}/api/v1/oauth2/callback";
+      pkce = true;
+      redirectUrl = "${publicHost}/auth/oauth2";
       scopes = [
         "sub"
         "preferred_username"
@@ -105,21 +115,9 @@ in
       proxyPass = "http://127.0.0.1:58390";
       proxyWebsockets = true;
       recommendedProxySettings = true;
-      extraConfig = ''
-        add_header 'Access-Control-Allow-Origin' $http_origin;
-        add_header 'Access-Control-Allow-Credentials' 'true';
-        add_header 'Access-Control-Allow-Methods' 'GET, PUT, DELETE, POST, OPTIONS';
-        add_header 'Access-Control-Allow-Headers' $http_access_control_request_headers;
-        add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range';
-        if ($request_method = 'OPTIONS') {
-          add_header 'Access-Control-Allow-Origin' $http_origin;
-          add_header 'Access-Control-Allow-Methods' 'GET, PUT, DELETE, POST, OPTIONS';
-          add_header 'Access-Control-Allow-Headers' $http_access_control_request_headers;
-          add_header 'Access-Control-Allow-Credentials' 'true';
-          add_header 'Access-Control-Max-Age' 1728000;
-          return 204;
-        }
-      '';
+      # CORS 由 Donetick 自己处理（server.cors_allow_origins，已并入 App 的
+      # https://localhost / capacitor://localhost）。不要在这里 add_header
+      # CORS 头：会与上游响应重复 Access-Control-Allow-Origin，浏览器会拒绝。
     };
     sslCertificate = "/var/ssl/allenyou.wang.crt";
     sslCertificateKey = "/var/ssl/allenyou.wang.key";

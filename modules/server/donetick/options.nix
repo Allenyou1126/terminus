@@ -312,6 +312,31 @@ in
         description = ''
           允许的 CORS 来源，对应 `server.cors_allow_origins`。默认值与上游
           selfhosted 模板一致（前端本地开发与 Capacitor 应用）。
+
+          实际生效的列表还会并入
+          {option}`terminus.donetick.server.mobileAppOrigins` 并去重。
+        '';
+      };
+
+      mobileAppOrigins = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [
+          "https://localhost"
+          "http://localhost"
+          "capacitor://localhost"
+        ];
+        description = ''
+          Capacitor 官方 App 的额外 CORS 来源，与
+          {option}`terminus.donetick.server.corsAllowOrigins` 合并去重后写入
+          `server.cors_allow_origins`。
+
+          Android App 的 WebView Origin 是 `https://localhost`（Capacitor 默认
+          `androidScheme = https`），iOS 是 `capacitor://localhost`。这些值来自
+          上游 selfhosted 模板；Web 前端同源访问不受影响。
+
+          单独做成选项的原因：主机常把 `corsAllowOrigins` 覆盖成自己的公网域名，
+          如果 App 的 Origin 只靠默认值提供就会丢失，导致 Android/iOS App 报
+          CORS 错误。设为 `[ ]` 可关闭。
         '';
       };
 
@@ -453,11 +478,49 @@ in
         '';
       };
 
+      pkce = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = ''
+          OAuth2 PKCE（`code_challenge` / `code_verifier`），对应 `oauth2.pkce`。
+
+          开启后 `/api/v1/resource` 会向 Web / App 前端宣告 PKCE：授权请求带
+          `code_challenge`（S256），服务端兑换 code 时带 `verifier`。
+
+          注意这跟 IdP 的「认证方式」是两件事：Donetick 0.1.89 只在 `clientId`
+          **和** `clientSecret` 都非空时才启用 OIDC
+          （`internal/auth/identity_provider.go`），所以 ZITADEL 侧仍应选
+          **Native + Auth Method `Basic` 或 `Post`**（会签发 secret），再按 IdP
+          是否接受 confidential client 的 PKCE 决定是否打开本选项。若选
+          ZITADEL 的 `PKCE` / `None` 认证方式（不签发 secret），Donetick 会
+          直接禁用 OIDC。
+        '';
+      };
+
       redirectUrl = lib.mkOption {
         type = lib.types.str;
         default = "";
-        example = "https://donetick.example.com/api/v1/oauth2/callback";
-        description = "OIDC 回调地址，对应 `oauth2.redirect_url`。";
+        example = "https://donetick.example.com/auth/oauth2";
+        description = ''
+          OIDC 回调地址，对应 `oauth2.redirect_url`。
+
+          注意这只是**服务端兜底值**：前端会自己带上 `redirect_uri`——Web 端是
+          `https://<你的域名>/auth/oauth2`，Android/iOS App 是
+          `donetick://auth/oauth2`（App 的 deep link scheme 就是 `donetick`）。
+          服务端在 `/api/v1/oauth/...` 的 code 交换中优先使用前端传来的值，
+          所以 IdP 侧必须同时登记这两条 URI：
+
+          - `https://<你的域名>/auth/oauth2`（Web；不是 `/api/v1/oauth2/callback`）
+          - `donetick://auth/oauth2`（Android / iOS App）
+
+          ZITADEL 中自定义 scheme 只允许用于 **Native** 类型的应用（code grant）；
+          Web 类型应用会报 `CustomOnlyForNative`，且应用类型创建后不能修改，
+          需要新建 Native 应用并把 Client ID/Secret 换过来。Donetick 要求
+          ClientSecret 非空（否则 OIDC 被禁用），因此 ZITADEL 的 Auth Method
+          选 `Basic` 或 `Post`；PKCE 参数是否下发由
+          {option}`terminus.donetick.oauth2.pkce` 单独控制（ZITADEL 的
+          `PKCE` / `None` 认证方式不签发 secret，会让 OIDC 被禁用）。
+        '';
       };
 
       scopes = lib.mkOption {

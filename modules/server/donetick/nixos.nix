@@ -54,14 +54,10 @@ let
       rate_limit = cfg.server.rateLimit;
       read_timeout = cfg.server.readTimeout;
       write_timeout = cfg.server.writeTimeout;
-      cors_allow_origins = cfg.server.corsAllowOrigins ++ [
-        "http://localhost:5173"
-        "http://localhost:7926"
-        # the below are required for the android app to work
-        "https://localhost"
-        "http://localhost"
-        "capacitor://localhost"
-      ];
+      # Donetick 的 CORS 是精确匹配白名单（main.go 里 AllowOriginFunc 查 map），
+      # 且 AllowCredentials = true。官方 App 的 Origin 与站点域名不同，所以把
+      # mobileAppOrigins 一并并入；去重避免重复的 Access-Control-Allow-Origin。
+      cors_allow_origins = lib.unique (cfg.server.corsAllowOrigins ++ cfg.server.mobileAppOrigins);
       serve_frontend = cfg.server.serveFrontend;
     }
     // lib.optionalAttrs (cfg.server.publicHost != null) {
@@ -89,6 +85,7 @@ let
     oauth2 = {
       client_id = cfg.oauth2.clientId;
       client_secret = "";
+      pkce = cfg.oauth2.pkce;
       redirect_url = cfg.oauth2.redirectUrl;
       scopes = cfg.oauth2.scopes;
       auth_url = cfg.oauth2.authUrl;
@@ -364,6 +361,11 @@ in
       after = [ "network-online.target" ];
 
       environment = serviceEnvironment;
+
+      # 配置内容变化时 unit 文件（ExecStart/Environment）通常不变，systemd 不会
+      # 自动重启，服务会继续用旧配置。restartTriggers 把生成的 YAML 纳入
+      # X-Restart-Triggers，colmena/nixos-rebuild switch 时只要配置变了就重启。
+      restartTriggers = [ configFile ];
 
       serviceConfig = hardening // {
         Type = "simple";
