@@ -160,6 +160,11 @@ in
             instance = "hkg-dog-darell";
             location = "hkg";
           })
+          (p.mkProbe "https://todo.allenyou.wang" {
+            description = "Donetick TODO";
+            instance = "hkg-dog-darell";
+            location = "hkg";
+          })
           (p.mkProbe "https://waline.allenyou.wang" {
             public = "true";
             description = "Waline 评论系统";
